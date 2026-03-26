@@ -1,0 +1,9 @@
+export { default as Navbar } from "./Navbar";
+export { default as Hero } from "./Hero";
+export { default as HowItWorks } from "./HowItWorks";
+export { default as Features } from "./Features";
+export { default as Corridors } from "./Corridors";
+export { default as Trust } from "./Trust";
+export { default as Testimonials } from "./Testimonials";
+export { default as Calculator } from "./Calculator";
+export { default as CtaFooter } from "./CtaFooter";
