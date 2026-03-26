@@ -1,0 +1,268 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// User & Auth
+// ============================================================
+
+model User {
+  id            String    @id @default(uuid())
+  phone         String    @unique
+  countryCode   String    @map("country_code")
+  firstName     String?   @map("first_name")
+  lastName      String?   @map("last_name")
+  email         String?   @unique
+  kycStatus     KycStatus @default(NONE) @map("kyc_status")
+  referralCode  String    @unique @map("referral_code")
+  referredBy    String?   @map("referred_by")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  wallets           Wallet[]
+  recipients        Recipient[]
+  transfersSent     Transfer[]       @relation("sender")
+  paymentRequests   PaymentRequest[] @relation("requester")
+  paymentsPaid      PaymentRequest[] @relation("payer")
+  transactions      Transaction[]
+  referralsMade     Referral[]       @relation("referrer")
+  referralsReceived Referral[]       @relation("referee")
+  refreshTokens     RefreshToken[]
+  devices           Device[]
+
+  @@map("users")
+}
+
+enum KycStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// Wallets
+// ============================================================
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  currency  String   @db.VarChar(3)
+  balance   Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditLogs WalletAudit[]
+
+  @@unique([userId, currency])
+  @@map("wallets")
+}
+
+model WalletAudit {
+  id            String   @id @default(uuid())
+  walletId      String   @map("wallet_id")
+  type          String
+  amount        Int
+  source        String
+  referenceId   String   @map("reference_id")
+  balanceBefore Int      @map("balance_before")
+  balanceAfter  Int      @map("balance_after")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  wallet Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([walletId])
+  @@map("wallet_audits")
+}
+
+// ============================================================
+// Recipients
+// ============================================================
+
+model Recipient {
+  id             String       @id @default(uuid())
+  userId         String       @map("user_id")
+  country        String       @db.VarChar(2)
+  currency       String       @db.VarChar(3)
+  firstName      String       @map("first_name")
+  lastName       String       @map("last_name")
+  payoutMethod   PayoutMethod @map("payout_method")
+  bankName       String?      @map("bank_name")
+  accountNumber  String?      @map("account_number")
+  routingNumber  String?      @map("routing_number")
+  mobileNumber   String?      @map("mobile_number")
+  mobileProvider String?      @map("mobile_provider")
+  isArchived     Boolean      @default(false) @map("is_archived")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transfers Transfer[]
+
+  @@index([userId])
+  @@map("recipients")
+}
+
+enum PayoutMethod {
+  BANK_TRANSFER
+  MOBILE_MONEY
+  CASH_PICKUP
+}
+
+// ============================================================
+// Transfers
+// ============================================================
+
+model Transfer {
+  id               String         @id @default(uuid())
+  userId           String         @map("user_id")
+  recipientId      String         @map("recipient_id")
+  sendAmount       Int            @map("send_amount")
+  sendCurrency     String         @map("send_currency") @db.VarChar(3)
+  receiveAmount    Int            @map("receive_amount")
+  receiveCurrency  String         @map("receive_currency") @db.VarChar(3)
+  fxRate           Float          @map("fx_rate")
+  fee              Int
+  status           TransferStatus @default(INITIATED)
+  rateId           String         @map("rate_id")
+  idempotencyKey   String         @unique @map("idempotency_key")
+  partnerReference String?        @map("partner_reference")
+  deliveredAt      DateTime?      @map("delivered_at")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  user      User      @relation("sender", fields: [userId], references: [id])
+  recipient Recipient @relation(fields: [recipientId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("transfers")
+}
+
+enum TransferStatus {
+  INITIATED
+  PROCESSING
+  DELIVERED
+  FAILED
+  REFUNDED
+}
+
+// ============================================================
+// Payment Requests
+// ============================================================
+
+model PaymentRequest {
+  id        String               @id @default(uuid())
+  userId    String               @map("user_id")
+  token     String               @unique
+  amount    Int
+  currency  String               @db.VarChar(3)
+  note      String?
+  status    PaymentRequestStatus @default(PENDING)
+  paidBy    String?              @map("paid_by")
+  expiresAt DateTime             @map("expires_at")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  requester User  @relation("requester", fields: [userId], references: [id])
+  payer     User? @relation("payer", fields: [paidBy], references: [id])
+
+  @@index([token])
+  @@map("payment_requests")
+}
+
+enum PaymentRequestStatus {
+  PENDING
+  PAID
+  EXPIRED
+}
+
+// ============================================================
+// Transactions (unified history)
+// ============================================================
+
+model Transaction {
+  id          String          @id @default(uuid())
+  userId      String          @map("user_id")
+  type        TransactionType
+  amount      Int
+  currency    String          @db.VarChar(3)
+  description String
+  status      String
+  referenceId String          @map("reference_id")
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, type])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  TRANSFER
+  WALLET_CREDIT
+  WALLET_DEBIT
+  PAYMENT_REQUEST
+}
+
+// ============================================================
+// Referrals
+// ============================================================
+
+model Referral {
+  id                String               @id @default(uuid())
+  referrerId        String               @map("referrer_id")
+  refereeId         String               @unique @map("referee_id")
+  firstTransferDate DateTime?            @map("first_transfer_date")
+  rewardStatus      ReferralRewardStatus @default(PENDING) @map("reward_status")
+  rewardAmount      Int                  @default(500) @map("reward_amount")
+  createdAt         DateTime             @default(now()) @map("created_at")
+
+  referrer User @relation("referrer", fields: [referrerId], references: [id])
+  referee  User @relation("referee", fields: [refereeId], references: [id])
+
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+enum ReferralRewardStatus {
+  PENDING
+  ELIGIBLE
+  REWARDED
+}
+
+// ============================================================
+// Devices (push notifications)
+// ============================================================
+
+model Device {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("devices")
+}
