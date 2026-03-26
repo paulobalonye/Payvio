@@ -5,6 +5,8 @@ import morgan from "morgan";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/error-handler";
 import { authRouter } from "./routes/auth.routes";
+import { userRouter } from "./routes/user.routes";
+import { kycRouter } from "./routes/kyc.routes";
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.get("/health", (_req, res) => {
 
 // API routes
 app.use("/auth", authRouter);
+app.use("/user", userRouter);
+app.use("/kyc", kycRouter);
 
 // Error handler (must be last)
 app.use(errorHandler);
