@@ -2,10 +2,12 @@ import type { Request, Response, NextFunction } from "express";
 import { WalletService } from "../services/wallet.service";
 import { StripeService } from "../services/stripe.service";
 import { FlutterwaveService } from "../services/flutterwave.service";
+import { TransactionService } from "../services/transaction.service";
 import { env } from "../config/env";
 import type { ApiResponse, Wallet } from "../types";
 
 const walletService = new WalletService();
+const transactionService = new TransactionService();
 
 // Real Stripe client using fetch (no SDK needed)
 const stripeService = new StripeService({
@@ -90,11 +92,24 @@ export class WalletController {
       await walletService.getOrCreateWallet(userId, currency ?? "USD");
 
       // Credit the wallet
+      const creditAmount = parseInt(amount);
+      const creditCurrency = currency ?? "USD";
       const wallet = await walletService.creditWallet(userId, {
-        amount: parseInt(amount),
-        currency: currency ?? "USD",
+        amount: creditAmount,
+        currency: creditCurrency,
         source: "card_funding",
         reference_id: payment_intent_id,
+      });
+
+      // Record transaction for history
+      await transactionService.record({
+        userId,
+        type: "wallet_credit",
+        amount: creditAmount,
+        currency: creditCurrency,
+        description: "Wallet funded via card",
+        status: "completed",
+        referenceId: payment_intent_id,
       });
 
       res.json({ success: true, data: wallet });
@@ -113,6 +128,16 @@ export class WalletController {
           currency: parsed.currency,
           source: "card_funding",
           reference_id: parsed.paymentIntentId,
+        });
+
+        await transactionService.record({
+          userId: parsed.userId,
+          type: "wallet_credit",
+          amount: parsed.amount,
+          currency: parsed.currency,
+          description: "Wallet funded via card",
+          status: "completed",
+          referenceId: parsed.paymentIntentId,
         });
       }
 
