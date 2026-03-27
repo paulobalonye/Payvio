@@ -85,4 +85,39 @@ describeIf("Live API Integration Tests", () => {
       expect(data.id).toBeDefined();
     });
   });
+
+  describe("Flutterwave — Bank Verification", () => {
+    it("should list Nigerian banks", async () => {
+      const res = await fetch("https://api.flutterwave.com/v3/banks/NG", {
+        headers: {
+          Authorization: `Bearer ${env.FLUTTERWAVE_SECRET_KEY}`,
+        },
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json() as any;
+      expect(data.status).toBe("success");
+      expect(data.data.length).toBeGreaterThan(0);
+    });
+
+    it("should verify a test bank account", async () => {
+      const res = await fetch("https://api.flutterwave.com/v3/accounts/resolve", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.FLUTTERWAVE_SECRET_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account_number: "0690000032",
+          account_bank: "044",
+        }),
+      });
+
+      expect(res.status).toBe(200);
+      const data = await res.json() as any;
+      expect(data.status).toBe("success");
+      expect(data.data.account_name).toBeDefined();
+      expect(data.data.account_number).toBe("0690000032");
+    });
+  });
 });
