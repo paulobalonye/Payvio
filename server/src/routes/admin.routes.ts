@@ -57,22 +57,22 @@ adminRouter.get("/users", adminAuthenticate, wrap(async (req, res) => {
 }));
 
 adminRouter.get("/users/:id", adminAuthenticate, wrap(async (req, res) => {
-  const data = await usersService.getUserDetail(req.params.id);
+  const data = await usersService.getUserDetail(req.params.id as string);
   res.json({ success: true, data });
 }));
 
 adminRouter.patch("/users/:id/status", adminAuthenticate, requireRole("SUPER_ADMIN", "COMPLIANCE"), wrap(async (req, res) => {
   const { action, reason } = req.body;
   if (action === "suspend") {
-    await usersService.suspendUser(req.params.id, reason, req.admin!.sub, req.ip ?? "unknown");
+    await usersService.suspendUser(req.params.id as string, reason, req.admin!.sub, req.ip ?? "unknown");
   } else {
-    await usersService.unsuspendUser(req.params.id, reason, req.admin!.sub, req.ip ?? "unknown");
+    await usersService.unsuspendUser(req.params.id as string, reason, req.admin!.sub, req.ip ?? "unknown");
   }
   res.json({ success: true });
 }));
 
 adminRouter.post("/users/:id/notes", adminAuthenticate, wrap(async (req, res) => {
-  const note = await usersService.addNote(req.params.id, req.body.content, req.admin!.sub);
+  const note = await usersService.addNote(req.params.id as string, req.body.content, req.admin!.sub);
   res.status(201).json({ success: true, data: note });
 }));
 
@@ -83,12 +83,12 @@ adminRouter.get("/kyc/queue", adminAuthenticate, requireRole("SUPER_ADMIN", "COM
 }));
 
 adminRouter.post("/kyc/:id/approve", adminAuthenticate, requireRole("SUPER_ADMIN", "COMPLIANCE"), wrap(async (req, res) => {
-  await kycService.approve(req.params.id, req.admin!.sub, req.ip ?? "unknown");
+  await kycService.approve(req.params.id as string, req.admin!.sub, req.ip ?? "unknown");
   res.json({ success: true });
 }));
 
 adminRouter.post("/kyc/:id/reject", adminAuthenticate, requireRole("SUPER_ADMIN", "COMPLIANCE"), wrap(async (req, res) => {
-  await kycService.reject(req.params.id, req.body.reason_code, req.admin!.sub, req.ip ?? "unknown");
+  await kycService.reject(req.params.id as string, req.body.reason_code, req.admin!.sub, req.ip ?? "unknown");
   res.json({ success: true });
 }));
 
@@ -113,7 +113,7 @@ adminRouter.get("/transfers", adminAuthenticate, wrap(async (req, res) => {
 
 adminRouter.post("/transfers/:id/refund", adminAuthenticate, requireRole("SUPER_ADMIN", "SUPPORT"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
-  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id } });
+  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id as string } });
   if (!transfer) { res.status(404).json({ success: false, error: "Transfer not found" }); return; }
 
   const { WalletService } = await import("../services/wallet.service");
@@ -148,15 +148,15 @@ adminRouter.patch("/fx/rates/:corridor", adminAuthenticate, requireRole("SUPER_A
   const { prisma } = await import("../config/database");
   const { spread, flat_fee } = req.body;
   const config = await prisma.fxRateConfig.upsert({
-    where: { corridor: req.params.corridor },
-    create: { corridor: req.params.corridor, spread, flatFee: flat_fee, updatedBy: req.admin!.sub },
+    where: { corridor: req.params.corridor as string },
+    create: { corridor: req.params.corridor as string, spread, flatFee: flat_fee, updatedBy: req.admin!.sub },
     update: { spread, flatFee: flat_fee, updatedBy: req.admin!.sub },
   });
 
   await prisma.adminAuditLog.create({
     data: {
       adminId: req.admin!.sub, action: "UPDATE_FX_CONFIG", entity: "fx_rate_config",
-      entityId: req.params.corridor, details: JSON.stringify({ spread, flat_fee }), ipAddress: req.ip ?? "unknown",
+      entityId: req.params.corridor as string, details: JSON.stringify({ spread, flat_fee }), ipAddress: req.ip ?? "unknown",
     },
   });
 
@@ -182,7 +182,7 @@ adminRouter.post("/promotions", adminAuthenticate, requireRole("SUPER_ADMIN", "F
 adminRouter.patch("/promotions/:id", adminAuthenticate, requireRole("SUPER_ADMIN", "FINANCE"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
   const promo = await prisma.promotion.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: req.body,
   });
   res.json({ success: true, data: promo });
@@ -190,7 +190,7 @@ adminRouter.patch("/promotions/:id", adminAuthenticate, requireRole("SUPER_ADMIN
 
 adminRouter.delete("/promotions/:id", adminAuthenticate, requireRole("SUPER_ADMIN", "FINANCE"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
-  await prisma.promotion.update({ where: { id: req.params.id }, data: { isActive: false } });
+  await prisma.promotion.update({ where: { id: req.params.id as string }, data: { isActive: false } });
   res.json({ success: true });
 }));
 
@@ -219,7 +219,7 @@ adminRouter.get("/referrals/stats", adminAuthenticate, wrap(async (_req, res) =>
 // === TRANSFER RETRY ===
 adminRouter.post("/transfers/:id/retry", adminAuthenticate, requireRole("SUPER_ADMIN", "SUPPORT"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
-  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id } });
+  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id as string } });
   if (!transfer) { res.status(404).json({ success: false, error: "Transfer not found" }); return; }
   if (transfer.status !== "FAILED") { res.status(400).json({ success: false, error: "Only failed transfers can be retried" }); return; }
 
@@ -259,7 +259,7 @@ adminRouter.get("/aml/flags", adminAuthenticate, requireRole("SUPER_ADMIN", "COM
 adminRouter.post("/aml/:id/action", adminAuthenticate, requireRole("SUPER_ADMIN", "COMPLIANCE"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
   const { action, reason } = req.body; // release | block | escalate
-  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id } });
+  const transfer = await prisma.transfer.findUnique({ where: { id: req.params.id as string } });
   if (!transfer) { res.status(404).json({ success: false, error: "Transfer not found" }); return; }
 
   if (action === "release") {
@@ -282,7 +282,7 @@ adminRouter.post("/aml/:id/action", adminAuthenticate, requireRole("SUPER_ADMIN"
 adminRouter.post("/kyc/:id/claim", adminAuthenticate, requireRole("SUPER_ADMIN", "COMPLIANCE"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
   await prisma.adminAuditLog.create({
-    data: { adminId: req.admin!.sub, action: "KYC_CLAIM", entity: "user", entityId: req.params.id, ipAddress: req.ip ?? "unknown" },
+    data: { adminId: req.admin!.sub, action: "KYC_CLAIM", entity: "user", entityId: req.params.id as string, ipAddress: req.ip ?? "unknown" },
   });
   res.json({ success: true });
 }));
@@ -292,12 +292,12 @@ adminRouter.post("/fx/rates/:corridor/override", adminAuthenticate, requireRole(
   const { prisma } = await import("../config/database");
   const { rate, expiry } = req.body;
   const config = await prisma.fxRateConfig.upsert({
-    where: { corridor: req.params.corridor },
-    create: { corridor: req.params.corridor, overrideRate: rate, overrideExpiry: new Date(expiry), updatedBy: req.admin!.sub },
+    where: { corridor: req.params.corridor as string },
+    create: { corridor: req.params.corridor as string, overrideRate: rate, overrideExpiry: new Date(expiry), updatedBy: req.admin!.sub },
     update: { overrideRate: rate, overrideExpiry: new Date(expiry), updatedBy: req.admin!.sub },
   });
   await prisma.adminAuditLog.create({
-    data: { adminId: req.admin!.sub, action: "FX_OVERRIDE", entity: "fx_rate_config", entityId: req.params.corridor, details: JSON.stringify({ rate, expiry }), ipAddress: req.ip ?? "unknown" },
+    data: { adminId: req.admin!.sub, action: "FX_OVERRIDE", entity: "fx_rate_config", entityId: req.params.corridor as string, details: JSON.stringify({ rate, expiry }), ipAddress: req.ip ?? "unknown" },
   });
   res.json({ success: true, data: config });
 }));
@@ -305,7 +305,7 @@ adminRouter.post("/fx/rates/:corridor/override", adminAuthenticate, requireRole(
 adminRouter.delete("/fx/rates/:corridor/override", adminAuthenticate, requireRole("SUPER_ADMIN", "FINANCE"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
   await prisma.fxRateConfig.update({
-    where: { corridor: req.params.corridor },
+    where: { corridor: req.params.corridor as string },
     data: { overrideRate: null, overrideExpiry: null, updatedBy: req.admin!.sub },
   });
   res.json({ success: true });
@@ -315,9 +315,9 @@ adminRouter.delete("/fx/rates/:corridor/override", adminAuthenticate, requireRol
 adminRouter.patch("/system/admins/:id/role", adminAuthenticate, requireRole("SUPER_ADMIN"), wrap(async (req, res) => {
   const { prisma } = await import("../config/database");
   const { role } = req.body;
-  await prisma.adminUser.update({ where: { id: req.params.id }, data: { role } });
+  await prisma.adminUser.update({ where: { id: req.params.id as string }, data: { role } });
   await prisma.adminAuditLog.create({
-    data: { adminId: req.admin!.sub, action: "CHANGE_ADMIN_ROLE", entity: "admin_user", entityId: req.params.id, details: `Changed to ${role}`, ipAddress: req.ip ?? "unknown" },
+    data: { adminId: req.admin!.sub, action: "CHANGE_ADMIN_ROLE", entity: "admin_user", entityId: req.params.id as string, details: `Changed to ${role}`, ipAddress: req.ip ?? "unknown" },
   });
   res.json({ success: true });
 }));
@@ -373,10 +373,10 @@ adminRouter.patch("/users/:id/limits", adminAuthenticate, requireRole("SUPER_ADM
   const { daily_limit } = req.body;
   // Store as admin note for now (can be a separate table later)
   await prisma.adminNote.create({
-    data: { userId: req.params.id, adminId: req.admin!.sub, content: `Transfer limit override: $${(daily_limit / 100).toFixed(2)}/day` },
+    data: { userId: req.params.id as string, adminId: req.admin!.sub, content: `Transfer limit override: $${(daily_limit / 100).toFixed(2)}/day` },
   });
   await prisma.adminAuditLog.create({
-    data: { adminId: req.admin!.sub, action: "TRANSFER_LIMIT_OVERRIDE", entity: "user", entityId: req.params.id, details: `daily_limit=${daily_limit}`, ipAddress: req.ip ?? "unknown" },
+    data: { adminId: req.admin!.sub, action: "TRANSFER_LIMIT_OVERRIDE", entity: "user", entityId: req.params.id as string, details: `daily_limit=${daily_limit}`, ipAddress: req.ip ?? "unknown" },
   });
   res.json({ success: true });
 }));
@@ -394,7 +394,7 @@ adminRouter.post("/system/admins", adminAuthenticate, requireRole("SUPER_ADMIN")
 }));
 
 adminRouter.patch("/system/admins/:id/deactivate", adminAuthenticate, requireRole("SUPER_ADMIN"), wrap(async (req, res) => {
-  await settingsService.deactivateAdmin(req.params.id, req.admin!.sub, req.ip ?? "unknown");
+  await settingsService.deactivateAdmin(req.params.id as string, req.admin!.sub, req.ip ?? "unknown");
   res.json({ success: true });
 }));
 
@@ -404,7 +404,7 @@ adminRouter.get("/system/limits", adminAuthenticate, wrap(async (_req, res) => {
 }));
 
 adminRouter.patch("/system/limits/:key", adminAuthenticate, requireRole("SUPER_ADMIN", "FINANCE"), wrap(async (req, res) => {
-  const data = await settingsService.updateLimit(req.params.key, req.body.value, req.admin!.sub);
+  const data = await settingsService.updateLimit(req.params.key as string, req.body.value, req.admin!.sub);
   res.json({ success: true, data });
 }));
 
@@ -414,7 +414,7 @@ adminRouter.get("/system/feature-flags", adminAuthenticate, wrap(async (_req, re
 }));
 
 adminRouter.patch("/system/feature-flags/:key", adminAuthenticate, requireRole("SUPER_ADMIN"), wrap(async (req, res) => {
-  const data = await settingsService.toggleFeatureFlag(req.params.key, req.body.enabled, req.admin!.sub);
+  const data = await settingsService.toggleFeatureFlag(req.params.key as string, req.body.enabled, req.admin!.sub);
   res.json({ success: true, data });
 }));
 

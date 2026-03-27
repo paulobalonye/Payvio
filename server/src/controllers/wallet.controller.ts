@@ -89,7 +89,7 @@ export class WalletController {
 
   async getBankList(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const country = (req.params.country ?? "NG").toUpperCase();
+      const country = (req.params.country as string ?? "NG").toUpperCase();
       const banks = await flutterwaveService.getBankList(country);
 
       res.json({ success: true, data: banks });

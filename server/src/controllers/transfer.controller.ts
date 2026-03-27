@@ -56,7 +56,7 @@ export class TransferController {
   async getRecipient(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.sub;
-      const recipient = await recipientService.getById(userId, req.params.id);
+      const recipient = await recipientService.getById(userId, req.params.id as string as string);
 
       if (!recipient) {
         res.status(404).json({ success: false, error: "Recipient not found" });
@@ -73,7 +73,7 @@ export class TransferController {
   async deleteRecipient(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.sub;
-      await recipientService.softDelete(userId, req.params.id);
+      await recipientService.softDelete(userId, req.params.id as string as string);
       res.status(204).send();
     } catch (err) {
       next(err);
@@ -96,7 +96,7 @@ export class TransferController {
   async getTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.sub;
-      const transfer = await transferService.getTransfer(userId, req.params.id);
+      const transfer = await transferService.getTransfer(userId, req.params.id as string as string);
 
       if (!transfer) {
         res.status(404).json({ success: false, error: "Transfer not found" });

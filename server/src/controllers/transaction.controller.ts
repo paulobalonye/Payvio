@@ -28,7 +28,7 @@ export class TransactionController {
   async getReceipt(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const html = receiptService.generateHtml({
-        transferId: req.params.id,
+        transferId: req.params.id as string,
         senderName: "User",
         recipientName: "Recipient",
         sendAmount: "$0.00",

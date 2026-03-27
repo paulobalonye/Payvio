@@ -21,7 +21,7 @@ export class PaymentRequestController {
 
   async getByToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const result = await service.getByToken(req.params.token);
+      const result = await service.getByToken(req.params.token as string as string);
 
       if (!result) {
         res.status(404).json({ success: false, error: "Payment request not found" });
@@ -37,7 +37,7 @@ export class PaymentRequestController {
   async fulfill(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const payerId = req.user!.sub;
-      const result = await service.fulfill(req.params.token, payerId);
+      const result = await service.fulfill(req.params.token as string as string, payerId);
 
       res.json({ success: true, data: result });
     } catch (err) {
