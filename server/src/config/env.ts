@@ -22,10 +22,10 @@ export const env = {
   OTP_MAX_ATTEMPTS: 3, // per hour per number
   OTP_LENGTH: 6,
 
-  // AWS SNS
-  AWS_REGION: process.env.AWS_REGION ?? "us-east-1",
-  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ?? "",
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY ?? "",
+  // Plivo (SMS)
+  PLIVO_AUTH_ID: process.env.PLIVO_AUTH_ID ?? "",
+  PLIVO_AUTH_TOKEN: process.env.PLIVO_AUTH_TOKEN ?? "",
+  PLIVO_SENDER_NUMBER: process.env.PLIVO_SENDER_NUMBER ?? "Payvio",
 
   // Stripe
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY ?? "",
