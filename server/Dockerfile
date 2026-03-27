@@ -9,7 +9,7 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+RUN npm ci --legacy-peer-deps
 
 COPY tsconfig.json prisma.config.ts ./
 COPY prisma/ ./prisma/
@@ -27,7 +27,7 @@ ENV NODE_ENV=production
 
 # Install production deps only
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy Prisma generated client + schema
 COPY --from=builder /app/src/generated/ ./src/generated/
