@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { env } from "../config/env";
 import type { FxRate } from "../types";
+import { YellowCardClient } from "./yellowcard.client";
 
 type HttpGetFn = (url: string, headers: Record<string, string>) => Promise<any>;
 
@@ -12,13 +12,23 @@ type RateCache = {
 const RATE_LOCK_TTL = 30; // seconds
 const CACHE_TTL = 60; // seconds
 
+// Currency code to YellowCard locale mapping
+const CURRENCY_LOCALE: Record<string, string> = {
+  NGN: "NG", KES: "KE", GHS: "GH", ZAR: "ZA", UGX: "UG",
+  TZS: "TZ", ETB: "ET", XOF: "CI", INR: "IN", PHP: "PH",
+  PKR: "PK", BDT: "BD", MXN: "MX", COP: "CO", BRL: "BR",
+};
+
 export class FxRateService {
   private readonly rateStore = new Map<string, FxRate>();
+  private readonly ycClient: YellowCardClient;
 
   constructor(
     private readonly httpGet?: HttpGetFn,
     private readonly cache?: RateCache
-  ) {}
+  ) {
+    this.ycClient = new YellowCardClient();
+  }
 
   async getRate(from: string, to: string): Promise<FxRate> {
     const cacheKey = `fx:${from}:${to}`;
@@ -28,32 +38,48 @@ export class FxRateService {
       const cached = await this.cache.get(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached) as FxRate;
-        // Return with fresh rate_id and expiry
-        const rate = this.createRateWithId(parsed.our_rate, parsed.fee, from, to);
-        return rate;
+        return this.createRateWithId(parsed.our_rate, parsed.fee, from, to);
       }
     }
 
-    // Fetch from YellowCard
-    const getFn = this.httpGet ?? this.defaultHttpGet;
-    const response = await getFn(
-      `${env.YELLOWCARD_BASE_URL}/rates?from=${from}&to=${to}`,
-      {
-        "X-YC-Timestamp": new Date().toISOString(),
-        Authorization: `Bearer ${env.YELLOWCARD_API_KEY}`,
+    // If a custom httpGet was provided (for testing), use it
+    if (this.httpGet) {
+      const response = await this.httpGet(`/rates?from=${from}&to=${to}`, {});
+      const ourRate = response.data.rate;
+      const fee = response.data.fee;
+
+      if (this.cache) {
+        await this.cache.set(cacheKey, JSON.stringify({ our_rate: ourRate, fee, from, to }), CACHE_TTL);
       }
+      return this.createRateWithId(ourRate, fee, from, to);
+    }
+
+    // Fetch from YellowCard live API
+    const ycRates = await this.ycClient.getRates();
+    const locale = CURRENCY_LOCALE[to];
+    const match = ycRates.rates.find(
+      (r) => r.code === to || (r.locale === locale && r.code === to)
     );
 
-    const ourRate = response.data.rate;
-    const fee = response.data.fee;
+    if (!match) {
+      // Fallback: find by code across all locales
+      const byCode = ycRates.rates.find((r) => r.code === to);
+      if (!byCode) {
+        throw new Error(`No YellowCard rate found for ${to}`);
+      }
+      const ourRate = byCode.sell;
+      const fee = 299; // default fee in cents ($2.99)
+      if (this.cache) {
+        await this.cache.set(cacheKey, JSON.stringify({ our_rate: ourRate, fee, from, to }), CACHE_TTL);
+      }
+      return this.createRateWithId(ourRate, fee, from, to);
+    }
 
-    // Cache the rate
+    const ourRate = match.sell;
+    const fee = 299; // $2.99 default
+
     if (this.cache) {
-      await this.cache.set(
-        cacheKey,
-        JSON.stringify({ our_rate: ourRate, fee, from, to }),
-        CACHE_TTL
-      );
+      await this.cache.set(cacheKey, JSON.stringify({ our_rate: ourRate, fee, from, to }), CACHE_TTL);
     }
 
     return this.createRateWithId(ourRate, fee, from, to);
@@ -71,27 +97,16 @@ export class FxRateService {
       rate_id: rateId,
       from,
       to,
-      mid_market_rate: ourRate * 1.003, // approximate
+      mid_market_rate: ourRate * 1.003,
       our_rate: ourRate,
       spread: 0.3,
       fee,
       expires_at: expiresAt,
     };
 
-    // Store for lookup by rate_id
     this.rateStore.set(rateId, rate);
-
-    // Clean up expired rates (simple in-memory cleanup)
     setTimeout(() => this.rateStore.delete(rateId), RATE_LOCK_TTL * 1000 + 5000);
 
     return rate;
-  }
-
-  private async defaultHttpGet(
-    url: string,
-    headers: Record<string, string>
-  ): Promise<any> {
-    const res = await fetch(url, { headers });
-    return res.json();
   }
 }

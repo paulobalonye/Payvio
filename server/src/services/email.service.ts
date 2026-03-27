@@ -91,10 +91,25 @@ export class EmailService {
     subject: string;
     html: string;
   }): Promise<{ id: string }> {
-    // In production, use Resend SDK:
-    // const resend = new Resend(env.RESEND_API_KEY);
-    // return resend.emails.send(params);
-    console.log(`[DEV] Email to ${params.to}: ${params.subject}`);
-    return { id: "dev-email-id" };
+    // Use Resend API directly
+    if (!env.RESEND_API_KEY || env.RESEND_API_KEY === "re_...") {
+      console.log(`[DEV] Email to ${params.to}: ${params.subject}`);
+      return { id: "dev-email-id" };
+    }
+
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Resend API error: ${res.status}`);
+    }
+
+    return res.json() as Promise<{ id: string }>;
   }
 }

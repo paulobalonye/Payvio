@@ -34,10 +34,12 @@ export const env = {
   // YellowCard
   YELLOWCARD_API_KEY: process.env.YELLOWCARD_API_KEY ?? "",
   YELLOWCARD_SECRET_KEY: process.env.YELLOWCARD_SECRET_KEY ?? "",
-  YELLOWCARD_BASE_URL: process.env.YELLOWCARD_BASE_URL ?? "https://sandbox.yellowcard.io",
+  YELLOWCARD_BASE_URL: process.env.YELLOWCARD_BASE_URL ?? "https://sandbox.api.yellowcard.io",
+  YELLOWCARD_MERCHANT_ID: process.env.YELLOWCARD_MERCHANT_ID ?? "",
 
   // Flutterwave
   FLUTTERWAVE_SECRET_KEY: process.env.FLUTTERWAVE_SECRET_KEY ?? "",
+  FLUTTERWAVE_PUBLIC_KEY: process.env.FLUTTERWAVE_PUBLIC_KEY ?? "",
   FLUTTERWAVE_WEBHOOK_SECRET: process.env.FLUTTERWAVE_WEBHOOK_SECRET ?? "",
 
   // Veriff
