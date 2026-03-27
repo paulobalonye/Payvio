@@ -2,6 +2,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { env } from "../config/env";
 import { AppError } from "../middleware/error-handler";
+import { SmsService } from "./sms.service";
 
 export interface OtpStore {
   get(key: string): Promise<string | null>;
@@ -12,7 +13,11 @@ export interface OtpStore {
 }
 
 export class OtpService {
-  constructor(private readonly store: OtpStore) {}
+  private readonly smsService: SmsService;
+
+  constructor(private readonly store: OtpStore, smsService?: SmsService) {
+    this.smsService = smsService ?? new SmsService();
+  }
 
   async sendOtp(phone: string, countryCode: string): Promise<{ expires_in: number }> {
     const fullNumber = `${countryCode}${phone}`;
@@ -35,10 +40,16 @@ export class OtpService {
     const otpKey = `otp:${fullNumber}`;
     await this.store.set(otpKey, hashed, env.OTP_TTL);
 
-    // TODO: Send via AWS SNS in production
-    // In development, log OTP
-    if (env.NODE_ENV === "development" || env.NODE_ENV === "test") {
-      console.log(`[DEV] OTP for ${fullNumber}: ${otp}`);
+    // Send via AWS SNS (skipped in test mode)
+    if (env.NODE_ENV === "test") {
+      console.log(`[TEST] OTP for ${fullNumber}: ${otp}`);
+    } else {
+      try {
+        await this.smsService.sendOtp(fullNumber, otp);
+      } catch (err) {
+        console.error("SMS delivery failed, OTP still stored:", err);
+        // Don't throw — OTP is stored, user can retry SMS
+      }
     }
 
     return { expires_in: env.OTP_TTL };
