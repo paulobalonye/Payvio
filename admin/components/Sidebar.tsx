@@ -1,12 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/roles";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const role = typeof window !== "undefined" ? localStorage.getItem("admin_role") ?? "SUPPORT" : "SUPPORT";
+  const [role, setRole] = useState<string>("SUPER_ADMIN");
+
+  useEffect(() => {
+    setRole(localStorage.getItem("admin_role") ?? "SUPER_ADMIN");
+  }, []);
 
   const filteredItems = NAV_ITEMS.filter((item) => item.roles.includes(role as any));
 
@@ -37,7 +42,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 border-t border-slate-700">
-        <p className="text-xs text-slate-500">{role.replace("_", " ")}</p>
+        <p className="text-xs text-slate-500">{role.replace(/_/g, " ")}</p>
         <button
           onClick={() => {
             localStorage.removeItem("admin_token");
