@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
 import { walletApi } from "../../../api";
 import { formatCurrency } from "../../../utils/format";
 import { useTheme } from "../../../utils/theme";
@@ -20,13 +21,17 @@ type Props = {
 export default function FundingSourceStep({ amount, onSelect, onBack }: Props) {
   const { colors } = useTheme();
   const [walletBalance, setWalletBalance] = useState(0);
+  const [savedCards, setSavedCards] = useState<any[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     walletApi.getWallet("USD").then(r => setWalletBalance(r.data.data?.balance ?? 0)).catch(() => {});
+    SecureStore.getItemAsync("saved_cards").then(stored => {
+      if (stored) setSavedCards(JSON.parse(stored));
+    }).catch(() => {});
   }, []);
 
-  const sources = [
+  const sources: any[] = [
     {
       id: "wallet",
       icon: "wallet" as const,
@@ -35,11 +40,19 @@ export default function FundingSourceStep({ amount, onSelect, onBack }: Props) {
       disabled: walletBalance < amount,
       disabledReason: "Insufficient balance",
     },
-    {
-      id: "card",
+    // Saved cards as individual options
+    ...savedCards.map(card => ({
+      id: `card-${card.id}`,
       icon: "card" as const,
-      label: "Debit Card",
-      detail: "Pay with your debit or credit card",
+      label: `${card.brand} •••• ${card.last4}`,
+      detail: `Expires ${String(card.expMonth).padStart(2, "0")}/${String(card.expYear).slice(-2)}`,
+      disabled: false,
+    })),
+    {
+      id: "new-card",
+      icon: "add-circle-outline" as const,
+      label: "New Debit Card",
+      detail: "Pay with a different card",
       disabled: false,
     },
     {
