@@ -96,7 +96,7 @@ export class EmailService {
     html: string;
   }): Promise<void> {
     try {
-      const send = this.sendFn ?? this.defaultSend;
+      const send = this.sendFn ?? this.defaultSend.bind(this);
       await send(params);
     } catch (err) {
       // Graceful degradation — log but don't throw
