@@ -10,6 +10,23 @@ export default function HomeScreen({ navigation }: any) {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string>("none");
+
+  // Check KYC status
+  const checkKycAndNavigate = async (screen: string) => {
+    try {
+      const { data } = await api.get("/user/profile");
+      const status = data.data.kyc_status;
+      setKycStatus(status);
+      if (status === "approved") {
+        navigation.navigate(screen);
+      } else {
+        navigation.navigate("KycVerification");
+      }
+    } catch {
+      navigation.navigate("KycVerification");
+    }
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -51,15 +68,15 @@ export default function HomeScreen({ navigation }: any) {
             </View>
 
             <View style={styles.actions}>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("KycGateAddMoney")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => checkKycAndNavigate("AddMoney")}>
                 <Text style={[styles.actionIcon, { color: colors.accent }]}>+</Text>
                 <Text style={[styles.actionText, { color: colors.text }]}>Add Money</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.accent, borderColor: colors.accent }]} onPress={() => navigation.navigate("KycGateSend")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.accent, borderColor: colors.accent }]} onPress={() => checkKycAndNavigate("SendFlow")}>
                 <Text style={[styles.actionIcon, { color: "#fff" }]}>↑</Text>
                 <Text style={[styles.actionText, { color: "#fff" }]}>Send</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("KycGateRequest")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => checkKycAndNavigate("PaymentRequest")}>
                 <Text style={[styles.actionIcon, { color: colors.accent }]}>↓</Text>
                 <Text style={[styles.actionText, { color: colors.text }]}>Request</Text>
               </TouchableOpacity>

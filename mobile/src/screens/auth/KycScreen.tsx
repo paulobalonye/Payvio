@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, Linking } from "react-native";
+import { View, Text, StyleSheet, Linking, AppState } from "react-native";
+import { useEffect, useRef } from "react";
 import Button from "../../components/Button";
 import { api } from "../../api";
 import { useTheme } from "../../utils/theme";
@@ -8,6 +9,21 @@ export default function KycScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sessionOpened, setSessionOpened] = useState(false);
+  const appState = useRef(AppState.currentState);
+
+  // Listen for app returning from browser (Veriff completed)
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (appState.current.match(/inactive|background/) && nextState === "active" && sessionOpened) {
+        // User returned from Veriff browser — go to status screen
+        setSessionOpened(false);
+        navigation.navigate("KycStatus");
+      }
+      appState.current = nextState;
+    });
+    return () => sub.remove();
+  }, [sessionOpened]);
 
   const handleStartKyc = async () => {
     setLoading(true);
@@ -17,17 +33,13 @@ export default function KycScreen({ navigation }: any) {
       const sessionUrl = data.data.session_url;
 
       if (sessionUrl) {
-        // Open Veriff verification in browser
-        // Veriff handles document scanning + face recognition
+        setSessionOpened(true);
         await Linking.openURL(sessionUrl);
-        // After user completes, navigate to status screen
-        navigation.navigate("KycStatus");
       } else {
         setError("Could not start verification. Try again.");
       }
     } catch (err: any) {
       if (err.response?.status === 400) {
-        // Already verified
         navigation.navigate("Main");
       } else {
         setError(err.response?.data?.error ?? "Failed to start verification. Try again.");

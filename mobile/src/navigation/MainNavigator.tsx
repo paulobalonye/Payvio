@@ -24,52 +24,7 @@ import { api } from "../api";
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// KYC gate wrapper — checks if user needs KYC before allowing financial actions
-function KycGateScreen({ navigation, targetScreen }: any) {
-  const [kycStatus, setKycStatus] = useState<string | null>(null);
-
-  useEffect(() => {
-    checkKyc();
-  }, []);
-
-  const checkKyc = async () => {
-    try {
-      const { data } = await api.get("/user/profile");
-      const status = data.data.kyc_status;
-      setKycStatus(status);
-      if (status === "approved") {
-        navigation.replace(targetScreen);
-      }
-    } catch {
-      setKycStatus("none");
-    }
-  };
-
-  if (kycStatus === null) return null;
-
-  if (kycStatus === "approved") return null;
-
-  if (kycStatus === "pending") {
-    return <KycStatusScreen navigation={navigation} />;
-  }
-
-  return <KycScreen navigation={{ ...navigation, navigate: (screen: string) => {
-    if (screen === "KycStatus") navigation.navigate("KycStatus");
-    else if (screen === "Main") navigation.replace(targetScreen);
-  }}} />;
-}
-
-function SendWithKyc({ navigation }: any) {
-  return <KycGateScreen navigation={navigation} targetScreen="SendFlow" />;
-}
-
-function AddMoneyWithKyc({ navigation }: any) {
-  return <KycGateScreen navigation={navigation} targetScreen="AddMoneyDirect" />;
-}
-
-function RequestWithKyc({ navigation }: any) {
-  return <KycGateScreen navigation={navigation} targetScreen="PaymentRequestDirect" />;
-}
+// Empty placeholder — KYC gating now handled in HomeScreen directly
 
 function HomeTabs() {
   const { colors } = useTheme();
@@ -110,9 +65,7 @@ export default function MainNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs" component={HomeTabs} />
-      <Stack.Screen name="KycGateSend" component={SendWithKyc} />
-      <Stack.Screen name="KycGateAddMoney" component={AddMoneyWithKyc} />
-      <Stack.Screen name="KycGateRequest" component={RequestWithKyc} />
+      {/* KYC gate screens removed — gating done in HomeScreen */}
       <Stack.Screen name="SendFlow" component={SendFlowScreen} />
       <Stack.Screen name="TransferTracking" component={TransferTrackingScreen} />
       <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} />
