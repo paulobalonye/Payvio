@@ -204,7 +204,7 @@ adminRouter.get("/referrals/stats", adminAuthenticate, wrap(async (_req, res) =>
 
   const referrerMap = new Map<string, { name: string; count: number; converted: number; earned: number }>();
   for (const r of referrals) {
-    const name = `${r.referrer.firstName ?? ""} ${r.referrer.lastName ?? ""}`.trim() || r.referrer.email ?? r.referrerId;
+    const name = `${r.referrer.firstName ?? ""} ${r.referrer.lastName ?? ""}`.trim() || (r.referrer.email ?? r.referrerId);
     const existing = referrerMap.get(r.referrerId) ?? { name, count: 0, converted: 0, earned: 0 };
     existing.count++;
     if (r.rewardStatus === "REWARDED") { existing.converted++; existing.earned += r.rewardAmount; }
