@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import Button from "../../../components/Button";
 import { transferApi } from "../../../api";
-import { colors } from "../../../utils/colors";
+import { useTheme } from "../../../utils/theme";
 
 type Props = {
   readonly country: { code: string; name: string; currency: string };
@@ -53,20 +53,26 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
     }
   };
 
+  const { colors: themeColors } = useTheme();
+
   if (showAdd) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: themeColors.bg }]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => setShowAdd(false)}>
             <Text style={styles.back}>← Back</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>New recipient in {country.name}</Text>
+          <Text style={[styles.title, { color: themeColors.text }]}>New recipient in {country.name}</Text>
         </View>
         <View style={styles.form}>
-          <TextInput style={styles.input} placeholder="First name" value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
-          <TextInput style={styles.input} placeholder="Last name" value={lastName} onChangeText={setLastName} autoCapitalize="words" />
-          <TextInput style={styles.input} placeholder="Bank name" value={bankName} onChangeText={setBankName} />
-          <TextInput style={styles.input} placeholder="Account number" value={accountNumber} onChangeText={setAccountNumber} keyboardType="number-pad" />
+          <Text style={[styles.fieldLabel, { color: themeColors.textSecondary }]}>First name</Text>
+          <TextInput style={[styles.input, { backgroundColor: themeColors.inputBg, borderColor: themeColors.inputBorder, color: themeColors.text }]} placeholder="First name" placeholderTextColor={themeColors.textMuted} value={firstName} onChangeText={setFirstName} autoCapitalize="words" />
+          <Text style={[styles.fieldLabel, { color: themeColors.textSecondary }]}>Last name</Text>
+          <TextInput style={[styles.input, { backgroundColor: themeColors.inputBg, borderColor: themeColors.inputBorder, color: themeColors.text }]} placeholder="Last name" placeholderTextColor={themeColors.textMuted} value={lastName} onChangeText={setLastName} autoCapitalize="words" />
+          <Text style={[styles.fieldLabel, { color: themeColors.textSecondary }]}>Bank name</Text>
+          <TextInput style={[styles.input, { backgroundColor: themeColors.inputBg, borderColor: themeColors.inputBorder, color: themeColors.text }]} placeholder="e.g. GTBank" placeholderTextColor={themeColors.textMuted} value={bankName} onChangeText={setBankName} />
+          <Text style={[styles.fieldLabel, { color: themeColors.textSecondary }]}>Account number</Text>
+          <TextInput style={[styles.input, { backgroundColor: themeColors.inputBg, borderColor: themeColors.inputBorder, color: themeColors.text }]} placeholder="10-digit account number" placeholderTextColor={themeColors.textMuted} value={accountNumber} onChangeText={setAccountNumber} keyboardType="number-pad" maxLength={10} />
           <Button
             title="Add & Continue"
             onPress={handleAddRecipient}
@@ -117,21 +123,22 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bgPrimary },
+  safe: { flex: 1 },
   header: { padding: 24, paddingBottom: 8 },
-  back: { fontSize: 16, color: colors.accent, fontWeight: "600", marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: "700", color: colors.textPrimary },
+  back: { fontSize: 16, color: "#4f46e5", fontWeight: "600", marginBottom: 16 },
+  title: { fontSize: 24, fontWeight: "700" },
   list: { padding: 24, paddingTop: 8 },
-  addNew: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: colors.accentLight, borderRadius: 12, borderWidth: 1, borderColor: colors.accent + "30", borderStyle: "dashed", marginBottom: 16 },
-  addIcon: { fontSize: 20, fontWeight: "700", color: colors.accent },
-  addText: { fontSize: 16, fontWeight: "600", color: colors.accent },
-  recipientRow: { flexDirection: "row", alignItems: "center", padding: 16, backgroundColor: colors.cardBg, borderRadius: 12, borderWidth: 1, borderColor: colors.cardBorder, marginBottom: 12 },
-  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.accent, justifyContent: "center", alignItems: "center", marginRight: 14 },
-  avatarText: { color: colors.white, fontSize: 14, fontWeight: "700" },
+  addNew: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: "rgba(79,70,229,0.3)", borderStyle: "dashed", marginBottom: 16 },
+  addIcon: { fontSize: 20, fontWeight: "700", color: "#4f46e5" },
+  addText: { fontSize: 16, fontWeight: "600", color: "#4f46e5" },
+  recipientRow: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#4f46e5", justifyContent: "center", alignItems: "center", marginRight: 14 },
+  avatarText: { color: "#fff", fontSize: 14, fontWeight: "700" },
   recipientInfo: { flex: 1 },
-  recipientName: { fontSize: 16, fontWeight: "600", color: colors.textPrimary },
-  recipientBank: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
-  empty: { fontSize: 14, color: colors.textMuted, textAlign: "center", paddingVertical: 32 },
-  form: { padding: 24, gap: 16 },
-  input: { borderWidth: 1, borderColor: colors.cardBorder, borderRadius: 12, padding: 16, fontSize: 16, backgroundColor: colors.cardBg },
+  recipientName: { fontSize: 16, fontWeight: "600" },
+  recipientBank: { fontSize: 13, marginTop: 2 },
+  empty: { fontSize: 14, textAlign: "center", paddingVertical: 32 },
+  form: { padding: 24, gap: 8 },
+  fieldLabel: { fontSize: 12, fontWeight: "600", marginBottom: 2, marginTop: 8 },
+  input: { borderWidth: 1.5, borderRadius: 12, padding: 16, fontSize: 16 },
 });

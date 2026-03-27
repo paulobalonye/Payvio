@@ -31,7 +31,7 @@ export default function SettingsScreen({ navigation }: any) {
             <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Profile</Text>
             <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
               <SettingRow label="Name" value={`${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || "Not set"} colors={colors} />
-              <SettingRow label="Phone" value={`${user.country_code}${user.phone}`} colors={colors} />
+              <SettingRow label="Phone" value={user.phone ? `${user.country_code ?? ""}${user.phone}` : "Not set"} colors={colors} />
               <SettingRow label="Email" value={user.email ?? "Not set"} colors={colors} />
               <View style={[styles.row, { borderBottomColor: colors.cardBorder }]}>
                 <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>KYC Status</Text>

@@ -2,13 +2,33 @@ import type { Request, Response, NextFunction } from "express";
 import { WalletService } from "../services/wallet.service";
 import { StripeService } from "../services/stripe.service";
 import { FlutterwaveService } from "../services/flutterwave.service";
+import { env } from "../config/env";
 import type { ApiResponse, Wallet } from "../types";
 
 const walletService = new WalletService();
+
+// Real Stripe client using fetch (no SDK needed)
 const stripeService = new StripeService({
   paymentIntents: {
-    create: async () => {
-      throw new Error("Stripe not configured — set STRIPE_SECRET_KEY");
+    create: async (params: { amount: number; currency: string; metadata: Record<string, string> }) => {
+      const res = await fetch("https://api.stripe.com/v1/payment_intents", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          amount: params.amount.toString(),
+          currency: params.currency.toLowerCase(),
+          "metadata[user_id]": params.metadata.user_id,
+          "metadata[type]": params.metadata.type,
+        }).toString(),
+      });
+      if (!res.ok) {
+        const err = await res.json() as any;
+        throw new Error(err.error?.message ?? "Stripe error");
+      }
+      return res.json() as Promise<any>;
     },
   },
 });
@@ -44,6 +64,9 @@ export class WalletController {
     try {
       const userId = req.user!.sub;
       const { amount, currency } = req.body;
+
+      // Ensure wallet exists before funding
+      await walletService.getOrCreateWallet(userId, currency ?? "USD");
 
       const result = await stripeService.createFundingIntent(userId, amount, currency ?? "USD");
 

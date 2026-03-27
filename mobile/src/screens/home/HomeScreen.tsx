@@ -51,15 +51,15 @@ export default function HomeScreen({ navigation }: any) {
             </View>
 
             <View style={styles.actions}>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("AddMoney")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("KycGateAddMoney")}>
                 <Text style={[styles.actionIcon, { color: colors.accent }]}>+</Text>
                 <Text style={[styles.actionText, { color: colors.text }]}>Add Money</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.accent, borderColor: colors.accent }]} onPress={() => navigation.navigate("Send")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.accent, borderColor: colors.accent }]} onPress={() => navigation.navigate("KycGateSend")}>
                 <Text style={[styles.actionIcon, { color: "#fff" }]}>↑</Text>
                 <Text style={[styles.actionText, { color: "#fff" }]}>Send</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("PaymentRequest")}>
+              <TouchableOpacity style={[styles.actionButton, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => navigation.navigate("KycGateRequest")}>
                 <Text style={[styles.actionIcon, { color: colors.accent }]}>↓</Text>
                 <Text style={[styles.actionText, { color: colors.text }]}>Request</Text>
               </TouchableOpacity>
