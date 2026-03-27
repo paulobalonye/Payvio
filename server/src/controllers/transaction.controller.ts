@@ -12,7 +12,7 @@ export class TransactionController {
   async listTransactions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.sub;
-      const result = await transactionService.list(userId, req.query as any);
+      const result = await transactionService.list(userId, ((req as any).validated ?? req.query) as any);
 
       const response: ApiResponse<Transaction[]> = {
         success: true,

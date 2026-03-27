@@ -18,7 +18,7 @@ export class TransferController {
   // FX Rates
   async getRate(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { from, to } = req.query as { from: string; to: string };
+      const { from, to } = ((req as any).validated ?? req.query) as { from: string; to: string };
       const rate = await fxRateService.getRate(from, to);
 
       const response: ApiResponse<FxRate> = { success: true, data: rate };

@@ -11,7 +11,12 @@ export function validate(schema: ZodSchema, source: "body" | "query" | "params" 
       next(err);
       return;
     }
-    req[source] = result.data;
+    // Express 5 makes req.query read-only, so store validated data separately
+    if (source === "body") {
+      req.body = result.data;
+    } else {
+      (req as any).validated = result.data;
+    }
     next();
   };
 }

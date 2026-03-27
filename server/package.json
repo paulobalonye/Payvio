@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-sns": "^3.1018.0",
+    "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -25,6 +26,7 @@
     "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
+    "pg": "^8.20.0",
     "plivo": "^4.75.8",
     "prisma": "^7.5.0",
     "uuid": "^13.0.0",
@@ -37,6 +39,7 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.5.0",
+    "@types/pg": "^8.20.0",
     "@types/supertest": "^7.2.0",
     "@types/uuid": "^10.0.0",
     "jest": "^30.3.0",
