@@ -13,11 +13,11 @@ datasource db {
 
 model User {
   id            String    @id @default(uuid())
-  phone         String    @unique
-  countryCode   String    @map("country_code")
+  phone         String?   @unique
+  countryCode   String?   @map("country_code")
   firstName     String?   @map("first_name")
   lastName      String?   @map("last_name")
-  email         String?   @unique
+  email         String    @unique
   kycStatus     KycStatus @default(NONE) @map("kyc_status")
   referralCode  String    @unique @map("referral_code")
   referredBy    String?   @map("referred_by")

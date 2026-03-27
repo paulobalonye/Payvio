@@ -33,9 +33,10 @@ export class SettingsService {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        email: null,
+        email: `deleted-${userId}@payvio.deleted`,
         firstName: "Deleted",
         lastName: "User",
+        phone: null,
       },
     });
   }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import PhoneEntryScreen from "../screens/auth/PhoneEntryScreen";
+import EmailEntryScreen from "../screens/auth/PhoneEntryScreen";
 import OtpVerifyScreen from "../screens/auth/OtpVerifyScreen";
 import ProfileSetupScreen from "../screens/auth/ProfileSetupScreen";
 import type { User } from "../types";
@@ -12,26 +12,16 @@ type Props = {
 };
 
 export default function AuthNavigator({ onLogin }: Props) {
-  const [phoneData, setPhoneData] = useState<{ phone: string; countryCode: string } | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="PhoneEntry">
-        {() => (
-          <PhoneEntryScreen
-            onOtpSent={(phone, countryCode) => setPhoneData({ phone, countryCode })}
-          />
-        )}
+      <Stack.Screen name="EmailEntry">
+        {() => <EmailEntryScreen onOtpSent={(e) => setEmail(e)} />}
       </Stack.Screen>
-      {phoneData && (
+      {email && (
         <Stack.Screen name="OtpVerify">
-          {() => (
-            <OtpVerifyScreen
-              phone={phoneData.phone}
-              countryCode={phoneData.countryCode}
-              onVerified={onLogin}
-            />
-          )}
+          {() => <OtpVerifyScreen email={email} onVerified={onLogin} />}
         </Stack.Screen>
       )}
       <Stack.Screen name="ProfileSetup" component={ProfileSetupScreen} />

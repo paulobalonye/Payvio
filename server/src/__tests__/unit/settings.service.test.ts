@@ -94,7 +94,7 @@ describe("SettingsService", () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: "user-1" },
         data: expect.objectContaining({
-          email: null,
+          email: expect.stringContaining("deleted-"),
           firstName: "Deleted",
           lastName: "User",
         }),
