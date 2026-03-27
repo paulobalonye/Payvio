@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Payvio — Add Recipient Flow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e2e8f0; padding: 30px; }
+  h1 { text-align: center; font-size: 24px; color: #0f172a; margin-bottom: 4px; }
+  .sub-h { text-align: center; font-size: 12px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; }
+  .step-title { text-align: center; font-size: 18px; font-weight: 700; color: #4f46e5; margin: 36px 0 6px; }
+  .step-sub { text-align: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+  .row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+  .mode-label { text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+
+  .phone {
+    width: 320px; height: 692px; border-radius: 36px; overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1); border: 6px solid #1a1a2e;
+    flex-shrink: 0;
+  }
+  .phone.light { background: #fafbff; }
+  .phone.dark { background: #0f172a; border-color: #334155; }
+  .screen { height: 100%; display: flex; flex-direction: column; padding: 50px 20px 24px; overflow-y: auto; }
+
+  .back { font-size: 14px; font-weight: 600; color: #4f46e5; margin-bottom: 12px; cursor: pointer; }
+  .pg-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .pg-sub { font-size: 13px; margin-bottom: 20px; }
+  .light .pg-title { color: #0f172a; }
+  .dark .pg-title { color: #f1f5f9; }
+  .light .pg-sub { color: #94a3b8; }
+  .dark .pg-sub { color: #64748b; }
+
+  /* Payout method selector */
+  .method-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+  .method-btn { flex: 1; padding: 12px 8px; border-radius: 12px; text-align: center; border: 1.5px solid; cursor: pointer; transition: all 0.2s; }
+  .light .method-btn { border-color: #e2e8f0; background: #fff; }
+  .dark .method-btn { border-color: #334155; background: #1e293b; }
+  .method-btn.active { border-color: #4f46e5 !important; }
+  .light .method-btn.active { background: #eef2ff; }
+  .dark .method-btn.active { background: #312e81; }
+  .method-icon { font-size: 22px; margin-bottom: 4px; }
+  .method-label { font-size: 11px; font-weight: 600; }
+  .light .method-label { color: #64748b; }
+  .dark .method-label { color: #94a3b8; }
+  .method-btn.active .method-label { color: #4f46e5 !important; }
+  .dark .method-btn.active .method-label { color: #818cf8 !important; }
+
+  /* Form */
+  .form-group { margin-bottom: 16px; }
+  .form-label { font-size: 12px; font-weight: 600; margin-bottom: 6px; display: block; }
+  .light .form-label { color: #64748b; }
+  .dark .form-label { color: #94a3b8; }
+  .form-input { width: 100%; padding: 14px 16px; border-radius: 12px; font-size: 15px; border: 1.5px solid; outline: none; transition: border-color 0.2s; }
+  .light .form-input { background: #fff; border-color: #e2e8f0; color: #0f172a; }
+  .dark .form-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+  .form-input:focus { border-color: #4f46e5 !important; }
+  .form-input::placeholder { }
+  .light .form-input::placeholder { color: #cbd5e1; }
+  .dark .form-input::placeholder { color: #475569; }
+
+  /* Bank selector dropdown */
+  .select-wrapper { position: relative; }
+  .form-select { width: 100%; padding: 14px 16px; border-radius: 12px; font-size: 15px; border: 1.5px solid; outline: none; appearance: none; cursor: pointer; }
+  .light .form-select { background: #fff; border-color: #e2e8f0; color: #0f172a; }
+  .dark .form-select { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+  .select-arrow { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 12px; pointer-events: none; }
+  .light .select-arrow { color: #94a3b8; }
+  .dark .select-arrow { color: #64748b; }
+
+  /* Verified account name */
+  .verified-name { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; margin-top: 8px; font-size: 13px; font-weight: 600; }
+  .light .verified-name { background: #ecfdf5; color: #059669; }
+  .dark .verified-name { background: #064e3b; color: #34d399; }
+  .verified-icon { font-size: 16px; }
+
+  /* Name row */
+  .name-row { display: flex; gap: 10px; }
+  .name-row .form-group { flex: 1; }
+
+  /* Mobile money fields */
+  .provider-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .provider-chip { padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid; display: flex; align-items: center; gap: 6px; }
+  .light .provider-chip { background: #fff; border-color: #e2e8f0; color: #0f172a; }
+  .dark .provider-chip { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+  .provider-chip.active { border-color: #4f46e5 !important; }
+  .light .provider-chip.active { background: #eef2ff; }
+  .dark .provider-chip.active { background: #312e81; }
+  .provider-logo { font-size: 18px; }
+
+  /* Confirm recipient card */
+  .confirm-card { border-radius: 16px; padding: 20px; border: 1px solid; margin-bottom: 20px; }
+  .light .confirm-card { background: #fff; border-color: #e2e8f0; }
+  .dark .confirm-card { background: #1e293b; border-color: #334155; }
+  .c-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid; font-size: 14px; }
+  .c-row:last-child { border: none; }
+  .light .c-row { border-color: #f1f5f9; }
+  .dark .c-row { border-color: #0f172a; }
+  .light .c-row .cl { color: #94a3b8; }
+  .dark .c-row .cl { color: #64748b; }
+  .c-row .cv { font-weight: 600; text-align: right; max-width: 55%; }
+  .light .c-row .cv { color: #0f172a; }
+  .dark .c-row .cv { color: #f1f5f9; }
+
+  .avatar-large { width: 56px; height: 56px; border-radius: 28px; background: linear-gradient(135deg, #4f46e5, #6366f1); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700; margin: 0 auto 12px; }
+  .recip-hero-name { text-align: center; font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .recip-hero-sub { text-align: center; font-size: 13px; margin-bottom: 20px; }
+  .light .recip-hero-name { color: #0f172a; }
+  .dark .recip-hero-name { color: #f1f5f9; }
+  .light .recip-hero-sub { color: #94a3b8; }
+  .dark .recip-hero-sub { color: #64748b; }
+
+  .success-icon { width: 64px; height: 64px; border-radius: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; }
+  .light .success-icon { background: #ecfdf5; color: #059669; }
+  .dark .success-icon { background: #064e3b; color: #34d399; }
+  .success-title { text-align: center; font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .light .success-title { color: #0f172a; }
+  .dark .success-title { color: #f1f5f9; }
+  .success-sub { text-align: center; font-size: 14px; margin-bottom: 32px; }
+  .light .success-sub { color: #94a3b8; }
+  .dark .success-sub { color: #64748b; }
+
+  .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-outline { background: transparent; border: 1.5px solid #4f46e5; color: #4f46e5; margin-top: 10px; }
+  .spacer { flex: 1; }
+  .note { text-align: center; font-size: 11px; margin-top: 10px; }
+  .light .note { color: #94a3b8; }
+  .dark .note { color: #64748b; }
+  .error-text { font-size: 12px; color: #ef4444; margin-top: 4px; }
+
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .light .section-label { color: #94a3b8; }
+  .dark .section-label { color: #64748b; }
+</style>
+</head>
+<body>
+
+<h1>Add Recipient — Full Flow</h1>
+<p class="sub-h">Bank Transfer & Mobile Money · Light & Dark</p>
+
+<!-- ====== STEP A: PAYOUT METHOD + NAME ====== -->
+<div class="step-title">Step A — Choose Method & Enter Name</div>
+<div class="step-sub">Select payout type and enter recipient's name</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="back">← Back</div>
+      <div class="pg-title">New recipient</div>
+      <div class="pg-sub">Sending to Nigeria 🇳🇬</div>
+
+      <div class="section-label">Payout method</div>
+      <div class="method-selector">
+        <div class="method-btn active">
+          <div class="method-icon">🏦</div>
+          <div class="method-label">Bank Transfer</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">📱</div>
+          <div class="method-label">Mobile Money</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">💵</div>
+          <div class="method-label">Cash Pickup</div>
+        </div>
+      </div>
+
+      <div class="name-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" value="Amara" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" value="Okafor" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Bank</label>
+        <div class="select-wrapper">
+          <div class="form-select">Guaranty Trust Bank (GTBank)</div>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Account number</label>
+        <input class="form-input" value="0123456789" placeholder="10-digit account number" />
+        <div class="verified-name">
+          <span class="verified-icon">✓</span>
+          OKAFOR AMARA CHIAMAKA
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Save Recipient</button>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="back">← Back</div>
+      <div class="pg-title">New recipient</div>
+      <div class="pg-sub">Sending to Nigeria 🇳🇬</div>
+
+      <div class="section-label">Payout method</div>
+      <div class="method-selector">
+        <div class="method-btn active">
+          <div class="method-icon">🏦</div>
+          <div class="method-label">Bank Transfer</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">📱</div>
+          <div class="method-label">Mobile Money</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">💵</div>
+          <div class="method-label">Cash Pickup</div>
+        </div>
+      </div>
+
+      <div class="name-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" value="Amara" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" value="Okafor" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Bank</label>
+        <div class="select-wrapper">
+          <div class="form-select">Guaranty Trust Bank (GTBank)</div>
+          <span class="select-arrow">▼</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Account number</label>
+        <input class="form-input" value="0123456789" placeholder="10-digit account number" />
+        <div class="verified-name">
+          <span class="verified-icon">✓</span>
+          OKAFOR AMARA CHIAMAKA
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Save Recipient</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ====== MOBILE MONEY VARIANT ====== -->
+<div class="step-title">Mobile Money Variant</div>
+<div class="step-sub">When user selects Mobile Money as payout method</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="back">← Back</div>
+      <div class="pg-title">New recipient</div>
+      <div class="pg-sub">Sending to Kenya 🇰🇪</div>
+
+      <div class="section-label">Payout method</div>
+      <div class="method-selector">
+        <div class="method-btn">
+          <div class="method-icon">🏦</div>
+          <div class="method-label">Bank Transfer</div>
+        </div>
+        <div class="method-btn active">
+          <div class="method-icon">📱</div>
+          <div class="method-label">Mobile Money</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">💵</div>
+          <div class="method-label">Cash Pickup</div>
+        </div>
+      </div>
+
+      <div class="name-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" value="David" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" value="Kamau" />
+        </div>
+      </div>
+
+      <div class="section-label">Mobile money provider</div>
+      <div class="provider-chips">
+        <div class="provider-chip active"><span class="provider-logo">🟢</span> M-Pesa</div>
+        <div class="provider-chip"><span class="provider-logo">🟡</span> MTN MoMo</div>
+        <div class="provider-chip"><span class="provider-logo">🔵</span> Airtel Money</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mobile number</label>
+        <input class="form-input" value="+254 712 345 678" placeholder="+254 7XX XXX XXX" />
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Save Recipient</button>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="back">← Back</div>
+      <div class="pg-title">New recipient</div>
+      <div class="pg-sub">Sending to Kenya 🇰🇪</div>
+
+      <div class="section-label">Payout method</div>
+      <div class="method-selector">
+        <div class="method-btn">
+          <div class="method-icon">🏦</div>
+          <div class="method-label">Bank Transfer</div>
+        </div>
+        <div class="method-btn active">
+          <div class="method-icon">📱</div>
+          <div class="method-label">Mobile Money</div>
+        </div>
+        <div class="method-btn">
+          <div class="method-icon">💵</div>
+          <div class="method-label">Cash Pickup</div>
+        </div>
+      </div>
+
+      <div class="name-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" value="David" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" value="Kamau" />
+        </div>
+      </div>
+
+      <div class="section-label">Mobile money provider</div>
+      <div class="provider-chips">
+        <div class="provider-chip active"><span class="provider-logo">🟢</span> M-Pesa</div>
+        <div class="provider-chip"><span class="provider-logo">🟡</span> MTN MoMo</div>
+        <div class="provider-chip"><span class="provider-logo">🔵</span> Airtel Money</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mobile number</label>
+        <input class="form-input" value="+254 712 345 678" placeholder="+254 7XX XXX XXX" />
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Save Recipient</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ====== CONFIRM + SUCCESS ====== -->
+<div class="step-title">Confirm & Success</div>
+<div class="step-sub">Review details before saving, then success state</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Confirm</p>
+    <div class="phone light"><div class="screen">
+      <div class="back">← Back</div>
+      <div class="pg-title">Confirm recipient</div>
+      <div class="pg-sub">Please verify these details are correct</div>
+
+      <div class="avatar-large">AO</div>
+      <div class="recip-hero-name">Amara Okafor</div>
+      <div class="recip-hero-sub">Nigeria 🇳🇬</div>
+
+      <div class="confirm-card">
+        <div class="c-row"><span class="cl">Payout method</span><span class="cv">Bank Transfer</span></div>
+        <div class="c-row"><span class="cl">Bank</span><span class="cv">GTBank</span></div>
+        <div class="c-row"><span class="cl">Account number</span><span class="cv">0123456789</span></div>
+        <div class="c-row"><span class="cl">Account name</span><span class="cv" style="color:#059669;font-weight:700">OKAFOR AMARA CHIAMAKA</span></div>
+        <div class="c-row"><span class="cl">Currency</span><span class="cv">NGN (Nigerian Naira)</span></div>
+      </div>
+
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Save Recipient</button>
+      <button class="btn btn-outline">Edit Details</button>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Success</p>
+    <div class="phone dark"><div class="screen">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div class="success-icon">✓</div>
+        <div class="success-title">Recipient Saved!</div>
+        <div class="success-sub">Amara Okafor has been added to your recipients. You can now send money to them.</div>
+
+        <div class="confirm-card" style="width:100%">
+          <div class="c-row"><span class="cl">Name</span><span class="cv">Amara Okafor</span></div>
+          <div class="c-row"><span class="cl">Bank</span><span class="cv">GTBank · ****6789</span></div>
+          <div class="c-row"><span class="cl">Country</span><span class="cv">🇳🇬 Nigeria</span></div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%">Send Money Now</button>
+        <button class="btn btn-outline" style="width:100%">Back to Recipients</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+</body>
+</html>

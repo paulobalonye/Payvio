@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Payvio — Send Money Flow (4 Steps)</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #e2e8f0; padding: 30px; }
+  h1 { text-align: center; font-size: 24px; color: #0f172a; margin-bottom: 4px; }
+  .sub-h { text-align: center; font-size: 12px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 30px; }
+  .step-title { text-align: center; font-size: 18px; font-weight: 700; color: #4f46e5; margin: 36px 0 6px; }
+  .step-sub { text-align: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; }
+  .row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+  .mode-label { text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+
+  .phone {
+    width: 320px; height: 692px; border-radius: 36px; overflow: hidden;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1); border: 6px solid #1a1a2e;
+    flex-shrink: 0;
+  }
+  .phone.light { background: #fafbff; }
+  .phone.dark { background: #0f172a; border-color: #334155; }
+  .screen { height: 100%; display: flex; flex-direction: column; padding: 50px 20px 24px; overflow-y: auto; }
+
+  /* Progress bar */
+  .progress { display: flex; gap: 4px; margin-bottom: 20px; }
+  .progress .bar { flex: 1; height: 3px; border-radius: 2px; }
+  .light .bar { background: #e2e8f0; }
+  .dark .bar { background: #334155; }
+  .bar.done { background: #4f46e5 !important; }
+  .bar.current { background: linear-gradient(90deg, #4f46e5 60%, #e2e8f0 60%) !important; }
+  .dark .bar.current { background: linear-gradient(90deg, #4f46e5 60%, #334155 60%) !important; }
+
+  .back { font-size: 14px; font-weight: 600; color: #4f46e5; margin-bottom: 12px; cursor: pointer; }
+  .pg-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .pg-sub { font-size: 13px; margin-bottom: 16px; }
+  .light .pg-title { color: #0f172a; }
+  .dark .pg-title { color: #f1f5f9; }
+  .light .pg-sub { color: #94a3b8; }
+  .dark .pg-sub { color: #64748b; }
+
+  .search-input { width: 100%; padding: 12px 16px; border-radius: 12px; font-size: 14px; border: 1px solid; outline: none; margin-bottom: 12px; }
+  .light .search-input { background: #fff; border-color: #e2e8f0; color: #0f172a; }
+  .dark .search-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+
+  /* Country row */
+  .country-row { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid; cursor: pointer; }
+  .light .country-row { border-color: #f1f5f9; }
+  .dark .country-row { border-color: #1e293b; }
+  .country-row:hover { opacity: 0.8; }
+  .cflag { font-size: 28px; margin-right: 14px; }
+  .cinfo { flex: 1; }
+  .cname { font-size: 15px; font-weight: 600; }
+  .ccurr { font-size: 12px; margin-top: 2px; }
+  .light .cname { color: #0f172a; }
+  .dark .cname { color: #f1f5f9; }
+  .light .ccurr { color: #94a3b8; }
+  .dark .ccurr { color: #64748b; }
+  .carrow { font-size: 18px; color: #94a3b8; }
+  .popular-badge { padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: 600; margin-right: 8px; }
+  .light .popular-badge { background: #eef2ff; color: #4f46e5; }
+  .dark .popular-badge { background: #312e81; color: #818cf8; }
+
+  /* Recipient */
+  .add-new-btn { display: flex; align-items: center; gap: 10px; padding: 16px; border-radius: 12px; border: 1.5px dashed; margin-bottom: 12px; cursor: pointer; }
+  .light .add-new-btn { border-color: rgba(79,70,229,0.3); background: rgba(79,70,229,0.04); }
+  .dark .add-new-btn { border-color: rgba(99,102,241,0.3); background: rgba(99,102,241,0.08); }
+  .add-icon { font-size: 18px; font-weight: 700; color: #4f46e5; }
+  .add-text { font-size: 15px; font-weight: 600; color: #4f46e5; }
+  .recip-card { display: flex; align-items: center; padding: 14px; border-radius: 12px; border: 1px solid; margin-bottom: 10px; cursor: pointer; }
+  .light .recip-card { background: #fff; border-color: #e2e8f0; }
+  .dark .recip-card { background: #1e293b; border-color: #334155; }
+  .recip-card.selected { border-color: #4f46e5 !important; border-width: 2px; }
+  .recip-avatar { width: 40px; height: 40px; border-radius: 20px; background: linear-gradient(135deg, #4f46e5, #6366f1); display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; margin-right: 12px; flex-shrink: 0; }
+  .recip-name { font-size: 15px; font-weight: 600; }
+  .recip-bank { font-size: 12px; margin-top: 2px; }
+  .light .recip-name { color: #0f172a; }
+  .dark .recip-name { color: #f1f5f9; }
+  .light .recip-bank { color: #94a3b8; }
+  .dark .recip-bank { color: #64748b; }
+  .recip-check { margin-left: auto; font-size: 18px; color: #4f46e5; }
+
+  /* Amount */
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .light .field-label { color: #94a3b8; }
+  .dark .field-label { color: #64748b; }
+  .amt-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .curr-pill { padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; }
+  .light .curr-pill { background: #f1f5f9; color: #64748b; }
+  .dark .curr-pill { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+  .amt-val { font-size: 36px; font-weight: 800; }
+  .light .amt-val { color: #0f172a; }
+  .dark .amt-val { color: #f1f5f9; }
+  .rate-box { border-radius: 12px; padding: 14px; margin-bottom: 20px; border: 1px solid; }
+  .light .rate-box { background: #fff; border-color: #e2e8f0; }
+  .dark .rate-box { background: #1e293b; border-color: #334155; }
+  .rate-r { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+  .light .rate-r .rl { color: #94a3b8; }
+  .dark .rate-r .rl { color: #64748b; }
+  .rate-r .rv { font-weight: 600; }
+  .light .rate-r .rv { color: #0f172a; }
+  .dark .rate-r .rv { color: #e2e8f0; }
+  .recv-val { font-size: 36px; font-weight: 800; color: #4f46e5; }
+  .rate-live { display: flex; align-items: center; gap: 6px; margin-bottom: 16px; }
+  .rate-dot { width: 6px; height: 6px; border-radius: 3px; background: #22c55e; }
+  .rate-live-text { font-size: 11px; }
+  .light .rate-live-text { color: #94a3b8; }
+  .dark .rate-live-text { color: #64748b; }
+
+  /* Confirm */
+  .summary-card { border-radius: 16px; padding: 20px; border: 1px solid; margin-bottom: 20px; }
+  .light .summary-card { background: #fff; border-color: #e2e8f0; }
+  .dark .summary-card { background: #1e293b; border-color: #334155; }
+  .s-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid; font-size: 14px; }
+  .s-row:last-child { border: none; }
+  .light .s-row { border-color: #f1f5f9; }
+  .dark .s-row { border-color: #1e293b; }
+  .s-row .sl { }
+  .light .s-row .sl { color: #94a3b8; }
+  .dark .s-row .sl { color: #64748b; }
+  .s-row .sv { font-weight: 600; }
+  .light .s-row .sv { color: #0f172a; }
+  .dark .s-row .sv { color: #f1f5f9; }
+  .s-row .sv.highlight { color: #4f46e5; font-weight: 800; }
+  .recip-summary { display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+  .light .recip-summary { background: #f8fafc; }
+  .dark .recip-summary { background: #0f172a; }
+  .rs-info .rs-name { font-size: 15px; font-weight: 700; }
+  .rs-info .rs-detail { font-size: 12px; margin-top: 2px; }
+  .light .rs-name { color: #0f172a; }
+  .dark .rs-name { color: #f1f5f9; }
+  .light .rs-detail { color: #94a3b8; }
+  .dark .rs-detail { color: #64748b; }
+  .amt-hero { text-align: center; margin-bottom: 20px; }
+  .amt-hero .send-lbl { font-size: 12px; margin-bottom: 4px; }
+  .light .send-lbl { color: #94a3b8; }
+  .dark .send-lbl { color: #64748b; }
+  .amt-hero .send-val { font-size: 32px; font-weight: 800; }
+  .light .send-val { color: #0f172a; }
+  .dark .send-val { color: #f1f5f9; }
+  .amt-hero .arrow { font-size: 20px; color: #4f46e5; margin: 8px 0; }
+  .amt-hero .recv-lbl { font-size: 12px; margin-bottom: 4px; }
+  .amt-hero .recv-big { font-size: 28px; font-weight: 800; color: #4f46e5; }
+  .auth-note { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; margin-bottom: 16px; font-size: 12px; font-weight: 500; }
+  .light .auth-note { background: #faf5ff; color: #7c3aed; }
+  .dark .auth-note { background: #2e1065; color: #a78bfa; }
+
+  .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-outline { background: transparent; border: 1.5px solid #4f46e5; color: #4f46e5; margin-top: 10px; }
+  .note { text-align: center; font-size: 11px; margin-top: 10px; }
+  .light .note { color: #94a3b8; }
+  .dark .note { color: #64748b; }
+  .min-note { text-align: center; font-size: 11px; color: #ef4444; margin-top: 6px; }
+  .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<h1>Send Money Flow — 4 Steps</h1>
+<p class="sub-h">Light & Dark Mode</p>
+
+<!-- ====== STEP 1: COUNTRY SELECT ====== -->
+<div class="step-title">Step 1 of 4 — Select Country</div>
+<div class="step-sub">User picks where to send money</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="progress"><div class="bar current"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Send money to</div>
+      <div class="pg-sub">Choose a destination country</div>
+      <input class="search-input" placeholder="Search countries..." value="" />
+      <div class="country-row"><span class="cflag">🇳🇬</span><div class="cinfo"><div class="cname">Nigeria</div><div class="ccurr">NGN · Naira</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇬🇭</span><div class="cinfo"><div class="cname">Ghana</div><div class="ccurr">GHS · Cedi</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇰🇪</span><div class="cinfo"><div class="cname">Kenya</div><div class="ccurr">KES · Shilling</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇮🇳</span><div class="cinfo"><div class="cname">India</div><div class="ccurr">INR · Rupee</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇲🇽</span><div class="cinfo"><div class="cname">Mexico</div><div class="ccurr">MXN · Peso</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇵🇭</span><div class="cinfo"><div class="cname">Philippines</div><div class="ccurr">PHP · Peso</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇿🇦</span><div class="cinfo"><div class="cname">South Africa</div><div class="ccurr">ZAR · Rand</div></div><span class="carrow">›</span></div>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="progress"><div class="bar current"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Send money to</div>
+      <div class="pg-sub">Choose a destination country</div>
+      <input class="search-input" placeholder="Search countries..." value="" />
+      <div class="country-row"><span class="cflag">🇳🇬</span><div class="cinfo"><div class="cname">Nigeria</div><div class="ccurr">NGN · Naira</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇬🇭</span><div class="cinfo"><div class="cname">Ghana</div><div class="ccurr">GHS · Cedi</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇰🇪</span><div class="cinfo"><div class="cname">Kenya</div><div class="ccurr">KES · Shilling</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇮🇳</span><div class="cinfo"><div class="cname">India</div><div class="ccurr">INR · Rupee</div></div><span class="popular-badge">Popular</span><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇲🇽</span><div class="cinfo"><div class="cname">Mexico</div><div class="ccurr">MXN · Peso</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇵🇭</span><div class="cinfo"><div class="cname">Philippines</div><div class="ccurr">PHP · Peso</div></div><span class="carrow">›</span></div>
+      <div class="country-row"><span class="cflag">🇿🇦</span><div class="cinfo"><div class="cname">South Africa</div><div class="ccurr">ZAR · Rand</div></div><span class="carrow">›</span></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ====== STEP 2: RECIPIENT ====== -->
+<div class="step-title">Step 2 of 4 — Choose Recipient</div>
+<div class="step-sub">Select saved recipient or add new one</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar current"></div><div class="bar"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Choose recipient</div>
+      <div class="pg-sub">Sending to Nigeria</div>
+      <div class="add-new-btn"><span class="add-icon">+</span><span class="add-text">Add new recipient</span></div>
+      <div class="recip-card selected">
+        <div class="recip-avatar">AO</div>
+        <div><div class="recip-name">Amara Okafor</div><div class="recip-bank">GTBank · ****6789</div></div>
+        <span class="recip-check">✓</span>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">CO</div>
+        <div><div class="recip-name">Chioma Obi</div><div class="recip-bank">Access Bank · ****2345</div></div>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">EE</div>
+        <div><div class="recip-name">Emeka Eze</div><div class="recip-bank">Zenith Bank · ****8901</div></div>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">FA</div>
+        <div><div class="recip-name">Fatima Adamu</div><div class="recip-bank">UBA · ****4567</div></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Continue with Amara</button>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar current"></div><div class="bar"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Choose recipient</div>
+      <div class="pg-sub">Sending to Nigeria</div>
+      <div class="add-new-btn"><span class="add-icon">+</span><span class="add-text">Add new recipient</span></div>
+      <div class="recip-card selected">
+        <div class="recip-avatar">AO</div>
+        <div><div class="recip-name">Amara Okafor</div><div class="recip-bank">GTBank · ****6789</div></div>
+        <span class="recip-check">✓</span>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">CO</div>
+        <div><div class="recip-name">Chioma Obi</div><div class="recip-bank">Access Bank · ****2345</div></div>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">EE</div>
+        <div><div class="recip-name">Emeka Eze</div><div class="recip-bank">Zenith Bank · ****8901</div></div>
+      </div>
+      <div class="recip-card">
+        <div class="recip-avatar">FA</div>
+        <div><div class="recip-name">Fatima Adamu</div><div class="recip-bank">UBA · ****4567</div></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Continue with Amara</button>
+    </div></div>
+  </div>
+</div>
+
+<!-- ====== STEP 3: AMOUNT ====== -->
+<div class="step-title">Step 3 of 4 — Enter Amount</div>
+<div class="step-sub">Live FX rate with dual-currency display</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar done"></div><div class="bar current"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Send to Nigeria</div>
+      <div class="rate-live"><div class="rate-dot"></div><div class="rate-live-text">Live rate · Updates every 30s</div></div>
+      <div class="field-label">You send</div>
+      <div class="amt-row"><div class="curr-pill">🇺🇸 USD</div><div class="amt-val">500.00</div></div>
+      <div class="rate-box">
+        <div class="rate-r"><span class="rl">Exchange rate</span><span class="rv">1 USD = 1,580.00 NGN</span></div>
+        <div class="rate-r"><span class="rl">Transfer fee</span><span class="rv">$2.99</span></div>
+        <div class="rate-r"><span class="rl">Total charge</span><span class="rv" style="font-weight:800">$502.99</span></div>
+      </div>
+      <div class="field-label">They receive</div>
+      <div class="amt-row"><div class="curr-pill">🇳🇬 NGN</div><div class="recv-val">790,000</div></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Continue</button>
+      <div class="min-note" style="visibility:hidden">.</div>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar done"></div><div class="bar current"></div><div class="bar"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Send to Nigeria</div>
+      <div class="rate-live"><div class="rate-dot"></div><div class="rate-live-text">Live rate · Updates every 30s</div></div>
+      <div class="field-label">You send</div>
+      <div class="amt-row"><div class="curr-pill">🇺🇸 USD</div><div class="amt-val">500.00</div></div>
+      <div class="rate-box">
+        <div class="rate-r"><span class="rl">Exchange rate</span><span class="rv">1 USD = 1,580.00 NGN</span></div>
+        <div class="rate-r"><span class="rl">Transfer fee</span><span class="rv">$2.99</span></div>
+        <div class="rate-r"><span class="rl">Total charge</span><span class="rv" style="font-weight:800">$502.99</span></div>
+      </div>
+      <div class="field-label">They receive</div>
+      <div class="amt-row"><div class="curr-pill">🇳🇬 NGN</div><div class="recv-val">790,000</div></div>
+      <div class="spacer"></div>
+      <button class="btn btn-primary">Continue</button>
+      <div class="min-note" style="visibility:hidden">.</div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ====== STEP 4: CONFIRM ====== -->
+<div class="step-title">Step 4 of 4 — Confirm & Send</div>
+<div class="step-sub">Review all details before sending</div>
+<div class="row">
+  <div>
+    <p class="mode-label">☀️ Light</p>
+    <div class="phone light"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar done"></div><div class="bar done"></div><div class="bar current"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Confirm transfer</div>
+      <div class="amt-hero">
+        <div class="send-lbl">You send</div>
+        <div class="send-val">$500.00</div>
+        <div class="arrow">↓</div>
+        <div class="send-lbl">They receive</div>
+        <div class="recv-big">₦790,000.00</div>
+      </div>
+      <div class="recip-summary">
+        <div class="recip-avatar" style="width:36px;height:36px;border-radius:18px;font-size:12px">AO</div>
+        <div class="rs-info"><div class="rs-name">Amara Okafor</div><div class="rs-detail">GTBank · ****6789 · Nigeria</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="s-row"><span class="sl">Exchange rate</span><span class="sv">1 USD = 1,580 NGN</span></div>
+        <div class="s-row"><span class="sl">Fee</span><span class="sv">$2.99</span></div>
+        <div class="s-row"><span class="sl">Delivery</span><span class="sv">⚡ ~3 minutes</span></div>
+        <div class="s-row"><span class="sl">Total charge</span><span class="sv highlight">$502.99</span></div>
+      </div>
+      <div class="auth-note">🔐 Requires Face ID to confirm</div>
+      <button class="btn btn-primary">Confirm & Send</button>
+      <div class="note">By confirming, you authorize this transfer from your USD wallet.</div>
+    </div></div>
+  </div>
+  <div>
+    <p class="mode-label">🌙 Dark</p>
+    <div class="phone dark"><div class="screen">
+      <div class="progress"><div class="bar done"></div><div class="bar done"></div><div class="bar done"></div><div class="bar current"></div></div>
+      <div class="back">← Back</div>
+      <div class="pg-title">Confirm transfer</div>
+      <div class="amt-hero">
+        <div class="send-lbl">You send</div>
+        <div class="send-val">$500.00</div>
+        <div class="arrow">↓</div>
+        <div class="send-lbl">They receive</div>
+        <div class="recv-big">₦790,000.00</div>
+      </div>
+      <div class="recip-summary">
+        <div class="recip-avatar" style="width:36px;height:36px;border-radius:18px;font-size:12px">AO</div>
+        <div class="rs-info"><div class="rs-name">Amara Okafor</div><div class="rs-detail">GTBank · ****6789 · Nigeria</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="s-row"><span class="sl">Exchange rate</span><span class="sv">1 USD = 1,580 NGN</span></div>
+        <div class="s-row"><span class="sl">Fee</span><span class="sv">$2.99</span></div>
+        <div class="s-row"><span class="sl">Delivery</span><span class="sv">⚡ ~3 minutes</span></div>
+        <div class="s-row"><span class="sl">Total charge</span><span class="sv highlight">$502.99</span></div>
+      </div>
+      <div class="auth-note">🔐 Requires Face ID to confirm</div>
+      <button class="btn btn-primary">Confirm & Send</button>
+      <div class="note">By confirming, you authorize this transfer from your USD wallet.</div>
+    </div></div>
+  </div>
+</div>
+
+</body>
+</html>

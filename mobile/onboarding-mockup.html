@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payvio Onboarding Mockups</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; gap: 40px; padding: 40px; flex-wrap: wrap; }
+
+  .phone {
+    width: 375px; height: 812px; background: #fafbff; border-radius: 40px; overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.15); position: relative; border: 8px solid #1a1a2e;
+  }
+
+  .screen { height: 100%; display: flex; flex-direction: column; padding: 60px 32px 40px; }
+
+  /* Illustration area */
+  .illustration {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 32px; position: relative;
+  }
+
+  .illus-circle {
+    width: 280px; height: 280px; border-radius: 50%; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Screen 1 - Send Money Globe */
+  .screen1 .illus-circle {
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  }
+  .globe {
+    width: 160px; height: 160px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
+    position: relative; overflow: hidden;
+    box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3);
+  }
+  .globe::before {
+    content: ''; position: absolute; top: 20px; left: 25px;
+    width: 40px; height: 30px; background: rgba(255,255,255,0.25);
+    border-radius: 40%; transform: rotate(-15deg);
+  }
+  .globe::after {
+    content: ''; position: absolute; bottom: 30px; right: 20px;
+    width: 50px; height: 35px; background: rgba(255,255,255,0.2);
+    border-radius: 40%; transform: rotate(10deg);
+  }
+  .globe-line { position: absolute; border: 1.5px solid rgba(255,255,255,0.15); border-radius: 50%; }
+  .globe-line.h { width: 160px; height: 80px; top: 40px; left: 0; }
+  .globe-line.v { width: 80px; height: 160px; top: 0; left: 40px; }
+
+  .float-card {
+    position: absolute; background: white; border-radius: 12px; padding: 10px 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08); font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .float-card .emoji { font-size: 20px; }
+  .fc1 { top: 20px; right: -10px; animation: float1 3s ease-in-out infinite; }
+  .fc2 { bottom: 30px; left: -15px; animation: float2 3.5s ease-in-out infinite; }
+  .fc3 { top: 80px; left: -20px; animation: float1 4s ease-in-out infinite 0.5s; }
+
+  @keyframes float1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @keyframes float2 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  /* Screen 2 - Rates */
+  .screen2 .illus-circle {
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  }
+  .rate-card-main {
+    background: white; border-radius: 20px; padding: 24px; width: 200px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  }
+  .rate-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+  .rate-row + .rate-row { border-top: 1px solid #f1f5f9; }
+  .rate-label { font-size: 13px; color: #64748b; }
+  .rate-value { font-size: 14px; font-weight: 700; color: #059669; }
+  .rate-big { font-size: 24px; font-weight: 800; color: #0f172a; text-align: center; margin: 8px 0; }
+  .rate-sub { font-size: 11px; color: #94a3b8; text-align: center; }
+  .savings-badge {
+    position: absolute; bottom: 15px; right: -5px;
+    background: #059669; color: white; padding: 8px 14px; border-radius: 20px;
+    font-size: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+    animation: float2 3s ease-in-out infinite;
+  }
+
+  /* Screen 3 - Security */
+  .screen3 .illus-circle {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  }
+  .shield {
+    width: 120px; height: 140px; position: relative;
+  }
+  .shield-body {
+    width: 120px; height: 140px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    clip-path: polygon(50% 0%, 100% 20%, 100% 65%, 50% 100%, 0% 65%, 0% 20%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.3);
+  }
+  .shield-check {
+    font-size: 48px; color: white; margin-top: -10px;
+  }
+  .speed-line {
+    position: absolute; height: 3px; border-radius: 3px; background: rgba(124,58,237,0.15);
+  }
+  .sl1 { width: 60px; top: 40px; right: -40px; }
+  .sl2 { width: 45px; top: 60px; right: -30px; }
+  .sl3 { width: 35px; top: 80px; right: -25px; }
+  .time-badge {
+    position: absolute; top: 20px; right: -20px;
+    background: white; border-radius: 12px; padding: 8px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    font-size: 13px; font-weight: 700; color: #6d28d9;
+    animation: float1 3s ease-in-out infinite;
+  }
+  .lock-badge {
+    position: absolute; bottom: 20px; left: -25px;
+    background: white; border-radius: 12px; padding: 8px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    font-size: 13px; font-weight: 700; color: #6d28d9;
+    animation: float2 3.5s ease-in-out infinite;
+  }
+
+  /* Text */
+  .content { text-align: center; }
+  .title { font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 12px; }
+  .subtitle { font-size: 16px; color: #64748b; line-height: 1.6; margin-bottom: 32px; }
+
+  /* Dots */
+  .dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+  .dot { width: 8px; height: 8px; border-radius: 4px; background: #e2e8f0; }
+  .dot.active { width: 24px; background: #4f46e5; }
+
+  /* Button */
+  .btn {
+    width: 100%; padding: 18px; border-radius: 14px; border: none;
+    font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: #4f46e5; color: white; }
+  .btn-skip { background: transparent; color: #94a3b8; font-size: 14px; margin-top: 12px; font-weight: 500; }
+
+  /* Label */
+  .phone-label {
+    text-align: center; margin-bottom: 12px; font-size: 14px; font-weight: 600;
+    color: #94a3b8; letter-spacing: 2px; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- Screen 1: Send Money Home -->
+<div>
+  <p class="phone-label">Screen 1</p>
+  <div class="phone">
+    <div class="screen screen1">
+      <div class="illustration">
+        <div class="illus-circle">
+          <div class="globe">
+            <div class="globe-line h"></div>
+            <div class="globe-line v"></div>
+          </div>
+          <div class="float-card fc1">
+            <span class="emoji">🇳🇬</span>
+            <span>₦780,000</span>
+          </div>
+          <div class="float-card fc2">
+            <span class="emoji">🇺🇸</span>
+            <span>$500</span>
+          </div>
+          <div class="float-card fc3">
+            <span class="emoji">🇰🇪</span>
+            <span>KES 76,750</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="title">Send Money Home,<br>Instantly</h2>
+        <p class="subtitle">Transfer money to your loved ones in 40+ countries. They receive it in minutes, not days.</p>
+      </div>
+
+      <div class="dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <button class="btn btn-primary">Next</button>
+      <button class="btn btn-skip">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 2: Best Rates -->
+<div>
+  <p class="phone-label">Screen 2</p>
+  <div class="phone">
+    <div class="screen screen2">
+      <div class="illustration">
+        <div class="illus-circle">
+          <div class="rate-card-main">
+            <div class="rate-sub">You send</div>
+            <div class="rate-big">$500.00</div>
+            <div style="width:100%;height:1px;background:#e2e8f0;margin:12px 0;"></div>
+            <div class="rate-row">
+              <span class="rate-label">Rate</span>
+              <span class="rate-value">1,560 NGN</span>
+            </div>
+            <div class="rate-row">
+              <span class="rate-label">Fee</span>
+              <span class="rate-value" style="color:#0f172a;">$2.99</span>
+            </div>
+            <div class="rate-row">
+              <span class="rate-label">They get</span>
+              <span class="rate-value">₦780,000</span>
+            </div>
+          </div>
+          <div class="savings-badge">Save 5x vs banks ✨</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="title">Real Rates,<br>Tiny Fees</h2>
+        <p class="subtitle">We use the mid-market rate — the same one you see on Google. Fees from just $1.99.</p>
+      </div>
+
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+
+      <button class="btn btn-primary">Next</button>
+      <button class="btn btn-skip">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen 3: Fast & Secure -->
+<div>
+  <p class="phone-label">Screen 3</p>
+  <div class="phone">
+    <div class="screen screen3">
+      <div class="illustration">
+        <div class="illus-circle">
+          <div class="shield">
+            <div class="shield-body">
+              <span class="shield-check">✓</span>
+            </div>
+            <div class="speed-line sl1"></div>
+            <div class="speed-line sl2"></div>
+            <div class="speed-line sl3"></div>
+          </div>
+          <div class="time-badge">⚡ 3 min delivery</div>
+          <div class="lock-badge">🔒 256-bit encrypted</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <h2 class="title">Fast, Secure,<br>Always Protected</h2>
+        <p class="subtitle">Bank-level encryption, biometric login, and real-time fraud monitoring. Your money is safe with us.</p>
+      </div>
+
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot active"></div>
+      </div>
+
+      <button class="btn btn-primary">Get Started</button>
+      <button class="btn btn-skip" style="visibility:hidden;">Skip</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
