@@ -16,6 +16,7 @@ import NotificationsScreen from "../screens/settings/NotificationsScreen";
 import HelpScreen from "../screens/settings/HelpScreen";
 import LegalScreen from "../screens/settings/LegalScreen";
 import LinkedBanksScreen from "../screens/settings/LinkedBanksScreen";
+import SavedCardsScreen from "../screens/settings/SavedCardsScreen";
 import KycScreen from "../screens/auth/KycScreen";
 import KycStatusScreen from "../screens/auth/KycStatusScreen";
 import { useTheme } from "../utils/theme";
@@ -79,6 +80,7 @@ export default function MainNavigator() {
       <Stack.Screen name="PrivacyPolicy" component={LegalScreen} />
       <Stack.Screen name="TermsOfService" component={LegalScreen} />
       <Stack.Screen name="LinkedBanks" component={LinkedBanksScreen} />
+      <Stack.Screen name="SavedCards" component={SavedCardsScreen} />
       <Stack.Screen name="KycVerification" component={KycScreen} />
       <Stack.Screen name="KycStatus" component={KycStatusScreen} />
     </Stack.Navigator>

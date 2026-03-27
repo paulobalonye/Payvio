@@ -52,6 +52,7 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Account</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
           <MenuRow label="Invite & Earn" onPress={() => navigation.navigate("Referral")} colors={colors} />
+          <MenuRow label="Saved Cards" onPress={() => navigation.navigate("SavedCards")} colors={colors} />
           <MenuRow label="Linked Bank Accounts" onPress={() => navigation.navigate("LinkedBanks")} colors={colors} />
           <MenuRow label="Notification Preferences" onPress={() => navigation.navigate("Notifications")} colors={colors} />
           <MenuRow label="Help & Support" onPress={() => navigation.navigate("Help")} colors={colors} last />

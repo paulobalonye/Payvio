@@ -209,13 +209,26 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
           </TouchableOpacity>
         }
         renderItem={({ item }) => (
-          <TouchableOpacity style={[styles.recipientRow, { backgroundColor: colors.card, borderColor: colors.cardBorder }]} onPress={() => onSelect(item)}>
-            <View style={styles.avatar}><Text style={styles.avatarText}>{item.first_name?.[0]}{item.last_name?.[0]}</Text></View>
-            <View style={styles.recipientInfo}>
-              <Text style={[styles.recipientName, { color: colors.text }]}>{item.first_name} {item.last_name}</Text>
-              <Text style={[styles.recipientBank, { color: colors.textMuted }]}>{item.bank_name ?? item.payout_method} · ****{item.account_number?.slice(-4)}</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={[styles.recipientRow, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+            <TouchableOpacity style={styles.recipientTap} onPress={() => onSelect(item)}>
+              <View style={styles.avatar}><Text style={styles.avatarText}>{item.first_name?.[0]}{item.last_name?.[0]}</Text></View>
+              <View style={styles.recipientInfo}>
+                <Text style={[styles.recipientName, { color: colors.text }]}>{item.first_name} {item.last_name}</Text>
+                <Text style={[styles.recipientBank, { color: colors.textMuted }]}>{item.bank_name ?? item.payout_method} · ****{item.account_number?.slice(-4)}</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={async () => {
+                try {
+                  await transferApi.deleteRecipient(item.id);
+                  loadRecipients();
+                } catch { alert("Failed to delete"); }
+              }}
+            >
+              <Text style={{ color: colors.error, fontSize: 13, fontWeight: "600" }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
         )}
         ListEmptyComponent={
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>No saved recipients for {country.name}. Add one above.</Text>
@@ -240,7 +253,9 @@ const styles = StyleSheet.create({
   addNew: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16, borderRadius: 12, borderWidth: 1, borderStyle: "dashed", marginBottom: 16 },
   addIcon: { fontSize: 20, fontWeight: "700" },
   addText: { fontSize: 16, fontWeight: "600" },
-  recipientRow: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 12 },
+  recipientRow: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 12, borderWidth: 1, marginBottom: 12, justifyContent: "space-between" },
+  recipientTap: { flexDirection: "row", alignItems: "center", flex: 1 },
+  deleteBtn: { paddingHorizontal: 8, paddingVertical: 4 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#4f46e5", justifyContent: "center", alignItems: "center", marginRight: 14 },
   avatarText: { color: "#fff", fontSize: 14, fontWeight: "700" },
   recipientInfo: { flex: 1 },
