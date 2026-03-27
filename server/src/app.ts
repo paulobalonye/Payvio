@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/error-handler";
 import { authRouter } from "./routes/auth.routes";
 import { userRouter } from "./routes/user.routes";
 import { kycRouter } from "./routes/kyc.routes";
+import { walletRouter } from "./routes/wallet.routes";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/kyc", kycRouter);
+app.use("/wallet", walletRouter);
 
 // Error handler (must be last)
 app.use(errorHandler);
