@@ -1,9 +1,7 @@
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
 
-const API_BASE_URL = __DEV__
-  ? "http://localhost:4000"
-  : "https://api.payvio.com";
+const API_BASE_URL = "https://api.payvioapp.com";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
