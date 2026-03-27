@@ -76,6 +76,33 @@ export class WalletController {
     }
   }
 
+  async creditAfterPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.user!.sub;
+      const { amount, currency, payment_intent_id } = req.body;
+
+      if (!amount || !payment_intent_id) {
+        res.status(400).json({ success: false, error: "Missing amount or payment_intent_id" });
+        return;
+      }
+
+      // Ensure wallet exists
+      await walletService.getOrCreateWallet(userId, currency ?? "USD");
+
+      // Credit the wallet
+      const wallet = await walletService.creditWallet(userId, {
+        amount: parseInt(amount),
+        currency: currency ?? "USD",
+        source: "card_funding",
+        reference_id: payment_intent_id,
+      });
+
+      res.json({ success: true, data: wallet });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   async handleStripeWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const parsed = stripeService.parseWebhookEvent(req.body);

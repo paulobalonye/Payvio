@@ -12,6 +12,9 @@ walletRouter.get("/all", authenticate, controller.getAllWallets);
 // Funding
 walletRouter.post("/fund", authenticate, controller.initiateFunding);
 
+// Credit wallet after successful Stripe payment (called by mobile app)
+walletRouter.post("/credit-after-payment", authenticate, controller.creditAfterPayment);
+
 // Stripe webhook (public — validated by signature)
 walletRouter.post("/webhooks/stripe", controller.handleStripeWebhook);
 

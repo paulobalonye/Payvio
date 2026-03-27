@@ -29,6 +29,7 @@ function AddMoneyContent({ navigation }: any) {
       // 1. Create Payment Intent on backend
       const { data } = await walletApi.initiateFunding(amountCents);
       const clientSecret = data.data.client_secret;
+      const paymentIntentId = data.data.payment_intent_id ?? data.data.id;
 
       if (!clientSecret) {
         setError("Could not create payment. Try again.");
@@ -57,6 +58,13 @@ function AddMoneyContent({ navigation }: any) {
           setError(paymentError.message);
         }
       } else {
+        // 4. Credit wallet after successful payment
+        try {
+          await walletApi.creditAfterPayment(amountCents, paymentIntentId);
+        } catch {
+          // Wallet will be credited via webhook as fallback
+        }
+
         Alert.alert("Success!", `$${(amountCents / 100).toFixed(2)} added to your wallet`, [
           { text: "OK", onPress: () => navigation.goBack() },
         ]);

@@ -77,6 +77,7 @@ export default function SendFlowScreen({ navigation }: any) {
           recipient={recipient}
           amount={amount}
           country={country}
+          fundingSource={fundingSource}
           onSuccess={(transferId) => navigation.navigate("TransferTracking", { transferId })}
           onBack={() => setStep("funding")}
         />

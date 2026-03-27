@@ -19,4 +19,11 @@ export const walletApi = {
 
   getBankList: (country = "NG") =>
     api.get(`/wallet/banks/${country}`),
+
+  creditAfterPayment: (amount: number, paymentIntentId: string, currency = "USD") =>
+    api.post("/wallet/credit-after-payment", {
+      amount,
+      currency,
+      payment_intent_id: paymentIntentId,
+    }),
 };

@@ -9,11 +9,12 @@ type Props = {
   readonly recipient: any;
   readonly amount: { sendAmount: number; rate: any };
   readonly country: { code: string; name: string; currency: string };
+  readonly fundingSource?: { type: string; label: string } | null;
   readonly onSuccess: (transferId: string) => void;
   readonly onBack: () => void;
 };
 
-export default function ConfirmStep({ recipient, amount, country, onSuccess, onBack }: Props) {
+export default function ConfirmStep({ recipient, amount, country, fundingSource, onSuccess, onBack }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -63,6 +64,7 @@ export default function ConfirmStep({ recipient, amount, country, onSuccess, onB
           <Row label="They receive" value={`${(receiveAmount / 100).toFixed(2)} ${country.currency}`} highlight />
           <Row label="Exchange rate" value={`1 USD = ${amount.rate.our_rate.toFixed(2)} ${country.currency}`} />
           <Row label="Fee" value={formatCurrency(amount.rate.fee)} />
+          {fundingSource ? <Row label="Funding Source" value={fundingSource.label} /> : null}
           <Row label="Delivery" value="~3 minutes" />
         </View>
 
@@ -71,7 +73,10 @@ export default function ConfirmStep({ recipient, amount, country, onSuccess, onB
         <View style={{ flex: 1 }} />
 
         <Button title="Confirm & Send" onPress={handleConfirm} loading={loading} />
-        <Text style={styles.note}>By confirming, you authorize this transfer from your USD wallet.</Text>
+        <Text style={styles.note}>
+          By confirming, you authorize this transfer
+          {fundingSource ? ` via ${fundingSource.label}` : " from your USD wallet"}.
+        </Text>
       </View>
     </SafeAreaView>
   );
