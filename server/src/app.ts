@@ -10,6 +10,9 @@ import { kycRouter } from "./routes/kyc.routes";
 import { walletRouter } from "./routes/wallet.routes";
 import { transferRouter } from "./routes/transfer.routes";
 import { transactionRouter } from "./routes/transaction.routes";
+import { paymentRequestRouter } from "./routes/payment-request.routes";
+import { referralRouter } from "./routes/referral.routes";
+import { settingsRouter } from "./routes/settings.routes";
 
 const app = express();
 
@@ -37,6 +40,9 @@ app.use("/kyc", kycRouter);
 app.use("/wallet", walletRouter);
 app.use("/api", transferRouter);
 app.use("/transactions", transactionRouter);
+app.use("/payment-requests", paymentRequestRouter);
+app.use("/referrals", referralRouter);
+app.use("/settings", settingsRouter);
 
 // Error handler (must be last)
 app.use(errorHandler);
