@@ -26,6 +26,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      ["@stripe/stripe-react-native", { "merchantIdentifier": "merchant.com.payvio.app", "enableGooglePay": true }],
+      "expo-web-browser"
+    ]
   }
 }
