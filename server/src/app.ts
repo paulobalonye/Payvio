@@ -8,6 +8,7 @@ import { authRouter } from "./routes/auth.routes";
 import { userRouter } from "./routes/user.routes";
 import { kycRouter } from "./routes/kyc.routes";
 import { walletRouter } from "./routes/wallet.routes";
+import { transferRouter } from "./routes/transfer.routes";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/auth", authRouter);
 app.use("/user", userRouter);
 app.use("/kyc", kycRouter);
 app.use("/wallet", walletRouter);
+app.use("/api", transferRouter);
 
 // Error handler (must be last)
 app.use(errorHandler);
