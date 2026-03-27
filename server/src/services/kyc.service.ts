@@ -31,7 +31,7 @@ export class KycService {
             lastName: user.lastName ?? "",
           },
           vendorData: userId,
-          callback: `${env.APP_URL}/webhooks/veriff`,
+          callback: `https://api.payvioapp.com/kyc/webhook`,
         },
       },
       {
@@ -52,21 +52,36 @@ export class KycService {
     };
   }
 
-  async handleWebhook(payload: VeriffWebhookPayload): Promise<void> {
+  async handleWebhook(payload: any): Promise<void> {
     const statusMap: Record<string, string> = {
       approved: "APPROVED",
       declined: "REJECTED",
       resubmission_requested: "NONE",
     };
 
-    const newStatus = statusMap[payload.status] ?? "NONE";
+    const status = payload.verification?.status ?? payload.status;
+    const newStatus = statusMap[status] ?? "NONE";
 
-    // Find user by vendorData (stored as session metadata)
-    // For now, we'll use the verification ID to look up
-    // In production, vendorData in the webhook contains the userId
+    // vendorData contains the userId we passed when creating the session
+    const userId = payload.vendorData ?? payload.verification?.vendorData;
+
+    if (!userId) {
+      console.error("Veriff webhook: no vendorData (userId) found");
+      return;
+    }
+
+    const updateData: any = { kycStatus: newStatus };
+
+    // If approved, update name from KYC verification
+    if (newStatus === "APPROVED" && payload.verification?.person) {
+      const { firstName, lastName } = payload.verification.person;
+      if (firstName) updateData.firstName = firstName;
+      if (lastName) updateData.lastName = lastName;
+    }
+
     await prisma.user.update({
-      where: { id: payload.verification.id },
-      data: { kycStatus: newStatus as any },
+      where: { id: userId },
+      data: updateData,
     });
   }
 
