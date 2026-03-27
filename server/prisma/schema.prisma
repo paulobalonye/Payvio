@@ -266,3 +266,113 @@ model Device {
   @@index([userId])
   @@map("devices")
 }
+
+// ============================================================
+// Admin Users & Audit
+// ============================================================
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         AdminRole
+  mfaSecret    String?   @map("mfa_secret")
+  mfaEnabled   Boolean   @default(false) @map("mfa_enabled")
+  backupCodes  String[]  @default([]) @map("backup_codes")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLogin    DateTime? @map("last_login")
+  failedLogins Int       @default(0) @map("failed_logins")
+  lockedUntil  DateTime? @map("locked_until")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  auditLogs AdminAuditLog[]
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  COMPLIANCE
+  SUPPORT
+  FINANCE
+}
+
+model AdminAuditLog {
+  id          String   @id @default(uuid())
+  adminId     String   @map("admin_id")
+  action      String
+  entity      String
+  entityId    String?  @map("entity_id")
+  details     String?
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  admin AdminUser @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([createdAt(sort: Desc)])
+  @@map("admin_audit_logs")
+}
+
+model AdminNote {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  adminId   String   @map("admin_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("admin_notes")
+}
+
+model FxRateConfig {
+  id        String   @id @default(uuid())
+  corridor  String   @unique
+  spread    Float    @default(0.3)
+  flatFee   Int      @default(299) @map("flat_fee")
+  overrideRate Float? @map("override_rate")
+  overrideExpiry DateTime? @map("override_expiry")
+  updatedBy String?  @map("updated_by")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("fx_rate_configs")
+}
+
+model Promotion {
+  id          String   @id @default(uuid())
+  type        String
+  name        String
+  corridors   String[] @default([])
+  eligibility String   @default("all")
+  discount    Int      @default(0)
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  usageCap    Int?     @map("usage_cap")
+  usageCount  Int      @default(0) @map("usage_count")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("promotions")
+}
+
+model FeatureFlag {
+  id        String  @id @default(uuid())
+  key       String  @unique
+  label     String
+  enabled   Boolean @default(false)
+  updatedBy String? @map("updated_by")
+
+  @@map("feature_flags")
+}
+
+model TransferLimit {
+  id              String @id @default(uuid())
+  key             String @unique
+  value           Int
+  description     String
+  updatedBy       String? @map("updated_by")
+
+  @@map("transfer_limits")
+}

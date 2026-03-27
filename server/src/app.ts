@@ -13,6 +13,7 @@ import { transactionRouter } from "./routes/transaction.routes";
 import { paymentRequestRouter } from "./routes/payment-request.routes";
 import { referralRouter } from "./routes/referral.routes";
 import { settingsRouter } from "./routes/settings.routes";
+import { adminRouter } from "./routes/admin.routes";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/transactions", transactionRouter);
 app.use("/payment-requests", paymentRequestRouter);
 app.use("/referrals", referralRouter);
 app.use("/settings", settingsRouter);
+app.use("/admin", adminRouter);
 
 // Error handler (must be last)
 app.use(errorHandler);
