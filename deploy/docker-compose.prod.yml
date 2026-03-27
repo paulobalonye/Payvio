@@ -1,0 +1,127 @@
+version: "3.9"
+
+services:
+  # === DATABASE ===
+  postgres:
+    image: postgres:16-alpine
+    container_name: payvio-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-payvio}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-payvio}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-payvio}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payvio-net
+
+  # === CACHE ===
+  redis:
+    image: redis:7-alpine
+    container_name: payvio-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - payvio-net
+
+  # === API SERVER ===
+  api:
+    build:
+      context: ../server
+      dockerfile: Dockerfile
+    container_name: payvio-api
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${DB_USER:-payvio}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-payvio}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      PLIVO_AUTH_ID: ${PLIVO_AUTH_ID}
+      PLIVO_AUTH_TOKEN: ${PLIVO_AUTH_TOKEN}
+      PLIVO_SENDER_NUMBER: ${PLIVO_SENDER_NUMBER}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      YELLOWCARD_API_KEY: ${YELLOWCARD_API_KEY}
+      YELLOWCARD_SECRET_KEY: ${YELLOWCARD_SECRET_KEY}
+      YELLOWCARD_BASE_URL: ${YELLOWCARD_BASE_URL}
+      YELLOWCARD_MERCHANT_ID: ${YELLOWCARD_MERCHANT_ID}
+      FLUTTERWAVE_SECRET_KEY: ${FLUTTERWAVE_SECRET_KEY}
+      FLUTTERWAVE_PUBLIC_KEY: ${FLUTTERWAVE_PUBLIC_KEY}
+      VERIFF_API_KEY: ${VERIFF_API_KEY}
+      VERIFF_SHARED_SECRET: ${VERIFF_SHARED_SECRET}
+      VERIFF_BASE_URL: ${VERIFF_BASE_URL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL}
+      REFERRAL_REWARD_CENTS: ${REFERRAL_REWARD_CENTS:-500}
+      APP_URL: ${APP_URL:-https://payvio.com}
+    networks:
+      - payvio-net
+
+  # === ADMIN DASHBOARD ===
+  admin:
+    build:
+      context: ../admin
+      dockerfile: Dockerfile
+    container_name: payvio-admin
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: ${API_URL:-https://api.payvio.com}
+    networks:
+      - payvio-net
+
+  # === LANDING PAGE ===
+  landing:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.landing
+    container_name: payvio-landing
+    restart: always
+    networks:
+      - payvio-net
+
+  # === REVERSE PROXY (Caddy — auto SSL) ===
+  caddy:
+    image: caddy:2-alpine
+    container_name: payvio-caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+      - admin
+      - landing
+    networks:
+      - payvio-net
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  payvio-net:
+    driver: bridge

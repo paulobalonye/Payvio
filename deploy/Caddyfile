@@ -1,0 +1,38 @@
+# Payvio — Caddy Reverse Proxy with Auto SSL
+# Caddy automatically provisions Let's Encrypt certificates
+
+# Landing page
+{$DOMAIN:payvioapp.com} {
+    reverse_proxy landing:3000
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}
+
+# API
+api.{$DOMAIN:payvioapp.com} {
+    reverse_proxy api:4000
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options nosniff
+        Access-Control-Allow-Origin *
+        Access-Control-Allow-Methods "GET, POST, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type"
+    }
+}
+
+# Admin dashboard
+admin.{$DOMAIN:payvioapp.com} {
+    reverse_proxy admin:3001
+    encode gzip
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options DENY
+        X-Content-Type-Options nosniff
+    }
+}
