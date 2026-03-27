@@ -35,26 +35,26 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">User Management</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">User Management</h1>
 
       <div className="flex gap-4 mb-6">
         <input value={search} onChange={(e) => handleSearch(e.target.value)}
           placeholder="Search by name, email, phone, or ID..."
-          className="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-sm outline-none focus:border-indigo-500" />
+          className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-sm outline-none focus:border-indigo-500" />
         <div className="flex gap-2">
           {FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-full text-xs font-medium transition ${filter === f ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 hover:bg-slate-50"}`}>
+              className={`px-4 py-2 rounded-full text-xs font-medium transition ${filter === f ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700"}`}>
               {FILTER_LABELS[f]}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-slate-500 bg-slate-50 border-b">
+            <tr className="text-left text-slate-500 bg-slate-50 dark:bg-slate-900 border-b">
               <th className="px-6 py-3">User</th>
               <th className="px-6 py-3">Email</th>
               <th className="px-6 py-3">Phone</th>
@@ -65,7 +65,7 @@ export default function UsersPage() {
           </thead>
           <tbody>
             {users.map(u => (
-              <tr key={u.id} className="border-b border-slate-100 hover:bg-slate-50">
+              <tr key={u.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
                 <td className="px-6 py-4 font-medium">{u.first_name ?? "—"} {u.last_name ?? ""}</td>
                 <td className="px-6 py-4 text-slate-600">{u.email ?? "—"}</td>
                 <td className="px-6 py-4 text-slate-600">{u.phone}</td>
@@ -77,7 +77,7 @@ export default function UsersPage() {
                     "bg-slate-100 text-slate-600"
                   }`}>{u.kyc_status}</span>
                 </td>
-                <td className="px-6 py-4 text-slate-500">{new Date(u.created_at).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{new Date(u.created_at).toLocaleDateString()}</td>
                 <td className="px-6 py-4">
                   <Link href={`/users/${u.id}`} className="text-indigo-600 text-xs font-medium hover:underline">View</Link>
                 </td>

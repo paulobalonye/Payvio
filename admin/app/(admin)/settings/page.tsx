@@ -92,19 +92,19 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">System Settings</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">System Settings</h1>
 
       <div className="flex gap-2 mb-6">
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === t.key ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition ${tab === t.key ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>
             {t.label}
           </button>
         ))}
       </div>
 
       {tab === "admins" && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <div className="flex justify-between mb-4">
             <h2 className="text-lg font-semibold">Admin Users</h2>
             <button onClick={() => setShowCreate(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium">Create Admin</button>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
             <thead><tr className="text-left text-slate-500 border-b"><th className="pb-3">Email</th><th className="pb-3">Role</th><th className="pb-3">Status</th><th className="pb-3">Last Login</th><th className="pb-3">Actions</th></tr></thead>
             <tbody>
               {admins.map(a => (
-                <tr key={a.id} className="border-b border-slate-100">
+                <tr key={a.id} className="border-b border-slate-100 dark:border-slate-700">
                   <td className="py-3">{a.email}</td>
                   <td className="py-3">
                     {editingRole === a.id ? (
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                     )}
                   </td>
                   <td className="py-3">{a.isActive ? <span className="text-emerald-600">Active</span> : <span className="text-red-600">Inactive</span>}</td>
-                  <td className="py-3 text-slate-500">{a.lastLogin ? new Date(a.lastLogin).toLocaleDateString() : "Never"}</td>
+                  <td className="py-3 text-slate-500 dark:text-slate-400">{a.lastLogin ? new Date(a.lastLogin).toLocaleDateString() : "Never"}</td>
                   <td className="py-3">{a.isActive && <button onClick={() => handleDeactivate(a.id)} className="text-red-600 text-xs font-medium">Deactivate</button>}</td>
                 </tr>
               ))}
@@ -139,23 +139,23 @@ export default function SettingsPage() {
       )}
 
       {tab === "limits" && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <h2 className="text-lg font-semibold mb-4">Transfer Limits</h2>
           <table className="w-full text-sm mb-4">
             <thead><tr className="text-left text-slate-500 border-b"><th className="pb-3">Key</th><th className="pb-3">Value (cents)</th><th className="pb-3">Description</th><th className="pb-3">Actions</th></tr></thead>
             <tbody>
               {limits.map(l => (
-                <tr key={l.id} className="border-b border-slate-100">
+                <tr key={l.id} className="border-b border-slate-100 dark:border-slate-700">
                   <td className="py-3 font-mono text-xs">{l.key}</td>
                   <td className="py-3"><input defaultValue={l.value} className="border rounded px-2 py-1 w-24 text-sm" onBlur={(e) => handleUpdateLimit(l.key, e.target.value)} /></td>
-                  <td className="py-3 text-slate-500">{l.description}</td>
+                  <td className="py-3 text-slate-500 dark:text-slate-400">{l.description}</td>
                   <td className="py-3 text-xs text-slate-400">{l.updatedBy ? `by ${l.updatedBy.slice(0,8)}` : ""}</td>
                 </tr>
               ))}
               {limits.length === 0 && <tr><td colSpan={4} className="py-4 text-center text-slate-400">No limits configured</td></tr>}
             </tbody>
           </table>
-          <div className="flex gap-3 pt-4 border-t border-slate-200">
+          <div className="flex gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
             <input value={newLimitKey} onChange={e => setNewLimitKey(e.target.value)} placeholder="Key (e.g. daily_send_limit)" className="border rounded-lg px-3 py-2 text-sm flex-1" />
             <input value={newLimitValue} onChange={e => setNewLimitValue(e.target.value)} placeholder="Value (cents)" className="border rounded-lg px-3 py-2 text-sm w-32" type="number" />
             <button onClick={handleAddLimit} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">Add</button>
@@ -164,14 +164,14 @@ export default function SettingsPage() {
       )}
 
       {tab === "flags" && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <h2 className="text-lg font-semibold mb-4">Feature Flags</h2>
           {flags.length > 0 ? flags.map(f => (
-            <div key={f.id} className="flex justify-between items-center py-3 border-b border-slate-100">
+            <div key={f.id} className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-700">
               <div><span className="font-medium">{f.label || f.key}</span><span className="text-xs text-slate-400 ml-2">{f.key}</span></div>
               <button onClick={() => handleToggleFlag(f.key, f.enabled)}
                 className={`w-12 h-6 rounded-full transition relative ${f.enabled ? "bg-indigo-600" : "bg-slate-300"}`}>
-                <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${f.enabled ? "left-7" : "left-1"}`} />
+                <span className={`absolute top-1 w-4 h-4 bg-white dark:bg-slate-800 rounded-full transition-all ${f.enabled ? "left-7" : "left-1"}`} />
               </button>
             </div>
           )) : <p className="text-slate-400 text-sm">No feature flags configured</p>}
@@ -179,7 +179,7 @@ export default function SettingsPage() {
       )}
 
       {tab === "audit" && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">Audit Log</h2>
             <button onClick={exportAuditCSV} className="text-xs text-indigo-600 font-medium hover:underline">Export CSV</button>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
             <thead><tr className="text-left text-slate-500 border-b"><th className="pb-3">Time</th><th className="pb-3">Admin</th><th className="pb-3">Action</th><th className="pb-3">Entity</th><th className="pb-3">Details</th></tr></thead>
             <tbody>
               {auditLog.map(l => (
-                <tr key={l.id} className="border-b border-slate-100">
+                <tr key={l.id} className="border-b border-slate-100 dark:border-slate-700">
                   <td className="py-3 text-slate-500 text-xs">{new Date(l.createdAt).toLocaleString()}</td>
                   <td className="py-3">{l.admin?.email ?? l.adminId?.slice(0,8)}</td>
                   <td className="py-3 font-medium text-xs">{l.action}</td>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
 
       {showCreate && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Create Admin</h3>
             <input placeholder="Email" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} className="w-full border rounded-lg p-3 text-sm mb-3" />
             <input type="password" placeholder="Temporary Password" value={newAdmin.password} onChange={e => setNewAdmin({...newAdmin, password: e.target.value})} className="w-full border rounded-lg p-3 text-sm mb-3" />

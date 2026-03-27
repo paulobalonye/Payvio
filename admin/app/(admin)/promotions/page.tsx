@@ -45,10 +45,10 @@ export default function PromotionsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Promotions & Referrals</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Promotions & Referrals</h1>
         <div className="flex gap-2">
-          <button onClick={() => setTab("promos")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "promos" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>Promotions</button>
-          <button onClick={() => setTab("referrals")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "referrals" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>Referrals</button>
+          <button onClick={() => setTab("promos")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "promos" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>Promotions</button>
+          <button onClick={() => setTab("referrals")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "referrals" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>Referrals</button>
         </div>
       </div>
 
@@ -59,10 +59,10 @@ export default function PromotionsPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {promos.map(p => (
-              <div key={p.id} className="bg-white rounded-xl p-6 border border-slate-200">
+              <div key={p.id} className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-semibold">{p.name}</h3>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{p.isActive ? "Active" : "Inactive"}</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500 dark:text-slate-400"}`}>{p.isActive ? "Active" : "Inactive"}</span>
                 </div>
                 <p className="text-sm text-slate-500 mb-1">Type: {p.type}</p>
                 <p className="text-sm text-slate-500 mb-1">Eligibility: {p.eligibility}</p>
@@ -80,22 +80,22 @@ export default function PromotionsPage() {
       {tab === "referrals" && referralStats && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <div className="bg-white rounded-xl p-6 border border-slate-200 text-center">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 text-center">
               <p className="text-sm text-slate-500 mb-1">Total Referrals</p>
-              <p className="text-3xl font-bold text-slate-900">{referralStats.total}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{referralStats.total}</p>
             </div>
-            <div className="bg-white rounded-xl p-6 border border-slate-200 text-center">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 text-center">
               <p className="text-sm text-slate-500 mb-1">Converted</p>
               <p className="text-3xl font-bold text-emerald-600">{referralStats.converted}</p>
               <p className="text-xs text-slate-400 mt-1">{referralStats.total > 0 ? `${((referralStats.converted / referralStats.total) * 100).toFixed(1)}%` : "0%"} conversion</p>
             </div>
-            <div className="bg-white rounded-xl p-6 border border-slate-200 text-center">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 text-center">
               <p className="text-sm text-slate-500 mb-1">Total Rewards Paid</p>
               <p className="text-3xl font-bold text-indigo-600">{fmt(referralStats.total_paid)}</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Top Referrers</h2>
               <button onClick={exportReferralCSV} className="text-xs text-indigo-600 font-medium hover:underline">Export CSV</button>
@@ -104,7 +104,7 @@ export default function PromotionsPage() {
               <thead><tr className="text-left text-slate-500 border-b"><th className="pb-3">Name</th><th className="pb-3">Referrals</th><th className="pb-3">Converted</th><th className="pb-3">Earned</th></tr></thead>
               <tbody>
                 {referralStats.top_referrers?.map((r: any, i: number) => (
-                  <tr key={i} className="border-b border-slate-100">
+                  <tr key={i} className="border-b border-slate-100 dark:border-slate-700">
                     <td className="py-3 font-medium">{r.name}</td>
                     <td className="py-3">{r.count}</td>
                     <td className="py-3">{r.converted}</td>
@@ -120,7 +120,7 @@ export default function PromotionsPage() {
 
       {showCreate && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Create Promotion</h3>
             <input placeholder="Name" value={form.name} onChange={e => setForm({...form, name: e.target.value})} className="w-full border rounded-lg p-3 text-sm mb-3" />
             <select value={form.type} onChange={e => setForm({...form, type: e.target.value})} className="w-full border rounded-lg p-3 text-sm mb-3">

@@ -73,10 +73,10 @@ export default function TransactionsPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Transactions</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Transactions</h1>
         <div className="flex gap-2">
-          <button onClick={() => setTab("transfers")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "transfers" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>Transfers</button>
-          <button onClick={() => setTab("aml")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "aml" ? "bg-red-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>
+          <button onClick={() => setTab("transfers")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "transfers" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>Transfers</button>
+          <button onClick={() => setTab("aml")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "aml" ? "bg-red-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>
             AML Flags {amlFlags.length > 0 && <span className="ml-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs">{amlFlags.length}</span>}
           </button>
         </div>
@@ -86,32 +86,32 @@ export default function TransactionsPage() {
         <>
           <div className="flex gap-3 mb-4">
             <input value={search} onChange={(e) => { setSearch(e.target.value); }} onKeyDown={(e) => e.key === "Enter" && fetchTransfers()}
-              placeholder="Search by transfer ID or user ID..." className="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-sm outline-none" />
-            <button onClick={exportCSV} className="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-600 font-medium">Export CSV</button>
+              placeholder="Search by transfer ID or user ID..." className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-sm outline-none" />
+            <button onClick={exportCSV} className="px-4 py-2 bg-white border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-600 font-medium">Export CSV</button>
           </div>
           <div className="flex gap-2 mb-6">
             {STATUS_FILTERS.map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2 rounded-full text-xs font-medium transition ${statusFilter === s ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300"}`}>
+                className={`px-4 py-2 rounded-full text-xs font-medium transition ${statusFilter === s ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>
                 {s || "All"}
               </button>
             ))}
           </div>
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="text-left text-slate-500 bg-slate-50 border-b">
+              <thead><tr className="text-left text-slate-500 bg-slate-50 dark:bg-slate-900 border-b">
                 <th className="px-4 py-3">ID</th><th className="px-4 py-3">User</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Corridor</th><th className="px-4 py-3">Fee</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Date</th><th className="px-4 py-3">Actions</th>
               </tr></thead>
               <tbody>
                 {transfers.map(t => (
-                  <tr key={t.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <tr key={t.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
                     <td className="px-4 py-3 font-mono text-xs">{t.id.slice(0,8)}</td>
                     <td className="px-4 py-3">{t.userId.slice(0,8)}</td>
                     <td className="px-4 py-3 font-medium">{fmt(t.sendAmount)}</td>
                     <td className="px-4 py-3">{t.sendCurrency}→{t.receiveCurrency}</td>
                     <td className="px-4 py-3">{fmt(t.fee)}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor(t.status)}`}>{t.status}</span></td>
-                    <td className="px-4 py-3 text-slate-500">{new Date(t.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{new Date(t.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 flex gap-2">
                       {t.status === "FAILED" && <button onClick={() => handleRetry(t.id)} className="text-indigo-600 text-xs font-medium">Retry</button>}
                       {(t.status === "FAILED" || t.status === "PROCESSING") && <button onClick={() => handleRefund(t.id)} className="text-red-600 text-xs font-medium">Refund</button>}
@@ -126,14 +126,14 @@ export default function TransactionsPage() {
       )}
 
       {tab === "aml" && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
-            <thead><tr className="text-left text-slate-500 bg-slate-50 border-b">
+            <thead><tr className="text-left text-slate-500 bg-slate-50 dark:bg-slate-900 border-b">
               <th className="px-4 py-3">Risk</th><th className="px-4 py-3">User</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Corridor</th><th className="px-4 py-3">Rule</th><th className="px-4 py-3">Hours in Queue</th><th className="px-4 py-3">Actions</th>
             </tr></thead>
             <tbody>
               {amlFlags.map(f => (
-                <tr key={f.id} className="border-b border-slate-100">
+                <tr key={f.id} className="border-b border-slate-100 dark:border-slate-700">
                   <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${riskColor(f.risk_score)}`}>{f.risk_score}</span></td>
                   <td className="px-4 py-3">{f.user_name || f.userId?.slice(0, 8)}</td>
                   <td className="px-4 py-3 font-medium">{fmt(f.sendAmount)}</td>

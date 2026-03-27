@@ -42,11 +42,11 @@ export default function UserDetailPage() {
 
   return (
     <div className="max-w-5xl">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">User Detail</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">User Detail</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Profile Card */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold mb-4">Profile</h2>
           <div className="space-y-3 text-sm">
             <Row label="ID" value={user.id} />
@@ -67,10 +67,10 @@ export default function UserDetailPage() {
         </div>
 
         {/* Wallets */}
-        <div className="bg-white rounded-xl p-6 border border-slate-200">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold mb-4">Wallets</h2>
           {user.wallets?.length > 0 ? user.wallets.map((w: any) => (
-            <div key={w.id} className="flex justify-between py-2 border-b border-slate-100">
+            <div key={w.id} className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-700">
               <span className="font-medium">{w.currency}</span>
               <span>{fmt(w.balance)}</span>
             </div>
@@ -81,13 +81,13 @@ export default function UserDetailPage() {
       {/* Suspend Modal */}
       {showSuspend && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">
               {user.kycStatus === "REJECTED" ? "Unsuspend User" : "Suspend User"}
             </h3>
             <textarea value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)}
               placeholder="Reason (min 20 characters)..." rows={3}
-              className="w-full border border-slate-300 rounded-lg p-3 text-sm mb-4 outline-none" />
+              className="w-full border border-slate-300 dark:border-slate-600 rounded-lg p-3 text-sm mb-4 outline-none" />
             <div className="flex gap-3">
               <button onClick={() => handleSuspend(user.kycStatus === "REJECTED" ? "unsuspend" : "suspend")}
                 className="flex-1 bg-red-600 text-white rounded-lg py-2 text-sm font-medium">Confirm</button>
@@ -99,7 +99,7 @@ export default function UserDetailPage() {
       )}
 
       {/* Recent Transfers */}
-      <div className="bg-white rounded-xl p-6 border border-slate-200 mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700 mb-6">
         <h2 className="text-lg font-semibold mb-4">Recent Transfers</h2>
         {user.transfersSent?.length > 0 ? (
           <table className="w-full text-sm">
@@ -112,7 +112,7 @@ export default function UserDetailPage() {
                   <td className="py-2">{fmt(t.sendAmount)} {t.sendCurrency}</td>
                   <td className="py-2">{t.receiveCurrency}</td>
                   <td className="py-2"><span className={`px-2 py-0.5 rounded-full text-xs ${t.status === "DELIVERED" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{t.status}</span></td>
-                  <td className="py-2 text-slate-500">{new Date(t.createdAt).toLocaleDateString()}</td>
+                  <td className="py-2 text-slate-500 dark:text-slate-400">{new Date(t.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -121,15 +121,15 @@ export default function UserDetailPage() {
       </div>
 
       {/* Admin Notes */}
-      <div className="bg-white rounded-xl p-6 border border-slate-200">
+      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 border border-slate-200 dark:border-slate-700">
         <h2 className="text-lg font-semibold mb-4">Admin Notes</h2>
         <div className="flex gap-3 mb-4">
           <input value={noteText} onChange={(e) => setNoteText(e.target.value)}
-            placeholder="Add a note..." className="flex-1 border border-slate-300 rounded-lg px-4 py-2 text-sm outline-none" />
+            placeholder="Add a note..." className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg px-4 py-2 text-sm outline-none" />
           <button onClick={handleAddNote} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium">Add</button>
         </div>
         {notes?.map((n: any) => (
-          <div key={n.id} className="py-3 border-b border-slate-100">
+          <div key={n.id} className="py-3 border-b border-slate-100 dark:border-slate-700">
             <p className="text-sm">{n.content}</p>
             <p className="text-xs text-slate-400 mt-1">{new Date(n.createdAt).toLocaleString()}</p>
           </div>
@@ -142,14 +142,14 @@ export default function UserDetailPage() {
 function Row({ label, value, badge }: { label: string; value: string; badge?: boolean }) {
   return (
     <div className="flex justify-between">
-      <span className="text-slate-500">{label}</span>
+      <span className="text-slate-500 dark:text-slate-400">{label}</span>
       {badge ? (
         <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
           value === "APPROVED" ? "bg-emerald-50 text-emerald-700" :
           value === "PENDING" ? "bg-amber-50 text-amber-700" :
           value === "REJECTED" ? "bg-red-50 text-red-700" : "bg-slate-100 text-slate-600"
         }`}>{value}</span>
-      ) : <span className="font-medium text-slate-900">{value}</span>}
+      ) : <span className="font-medium text-slate-900 dark:text-white">{value}</span>}
     </div>
   );
 }

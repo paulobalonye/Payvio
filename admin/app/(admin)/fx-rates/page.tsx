@@ -38,15 +38,15 @@ export default function FxRatesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">FX Rate Configuration</h1>
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">FX Rate Configuration</h1>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-slate-500 bg-slate-50 border-b">
+          <thead><tr className="text-left text-slate-500 bg-slate-50 dark:bg-slate-900 border-b">
             <th className="px-6 py-3">Corridor</th><th className="px-6 py-3">Spread %</th><th className="px-6 py-3">Flat Fee</th><th className="px-6 py-3">Override</th><th className="px-6 py-3">Actions</th>
           </tr></thead>
           <tbody>
             {configs.map(c => (
-              <tr key={c.id} className="border-b border-slate-100">
+              <tr key={c.id} className="border-b border-slate-100 dark:border-slate-700">
                 <td className="px-6 py-4 font-medium">{c.corridor}</td>
                 <td className="px-6 py-4">
                   {editing === c.corridor ? <input value={spread} onChange={e => setSpread(e.target.value)} className="w-20 border rounded px-2 py-1 text-sm" /> : `${c.spread}%`}
@@ -87,7 +87,7 @@ export default function FxRatesPage() {
       {/* Override Modal */}
       {showOverride && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 w-full max-w-md">
             <h3 className="text-lg font-semibold mb-4">Temporary Rate Override — {showOverride}</h3>
             <input type="number" step="0.01" placeholder="Override rate" value={overrideRate} onChange={e => setOverrideRate(e.target.value)} className="w-full border rounded-lg p-3 text-sm mb-3" />
             <input type="datetime-local" placeholder="Expiry" value={overrideExpiry} onChange={e => setOverrideExpiry(e.target.value)} className="w-full border rounded-lg p-3 text-sm mb-3" />
