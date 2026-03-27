@@ -12,6 +12,10 @@ import TransactionDetailScreen from "../screens/home/TransactionDetailScreen";
 import AddMoneyScreen from "../screens/wallet/AddMoneyScreen";
 import PaymentRequestScreen from "../screens/home/PaymentRequestScreen";
 import ReferralScreen from "../screens/settings/ReferralScreen";
+import NotificationsScreen from "../screens/settings/NotificationsScreen";
+import HelpScreen from "../screens/settings/HelpScreen";
+import LegalScreen from "../screens/settings/LegalScreen";
+import LinkedBanksScreen from "../screens/settings/LinkedBanksScreen";
 import KycScreen from "../screens/auth/KycScreen";
 import KycStatusScreen from "../screens/auth/KycStatusScreen";
 import { useTheme } from "../utils/theme";
@@ -117,6 +121,11 @@ export default function MainNavigator() {
       <Stack.Screen name="PaymentRequest" component={PaymentRequestScreen} />
       <Stack.Screen name="PaymentRequestDirect" component={PaymentRequestScreen} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="Help" component={HelpScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={LegalScreen} />
+      <Stack.Screen name="TermsOfService" component={LegalScreen} />
+      <Stack.Screen name="LinkedBanks" component={LinkedBanksScreen} />
       <Stack.Screen name="KycVerification" component={KycScreen} />
       <Stack.Screen name="KycStatus" component={KycStatusScreen} />
     </Stack.Navigator>

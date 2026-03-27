@@ -52,15 +52,15 @@ export default function SettingsScreen({ navigation }: any) {
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Account</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
           <MenuRow label="Invite & Earn" onPress={() => navigation.navigate("Referral")} colors={colors} />
-          <MenuRow label="Linked Bank Accounts" colors={colors} />
-          <MenuRow label="Notification Preferences" colors={colors} />
-          <MenuRow label="Help & Support" colors={colors} last />
+          <MenuRow label="Linked Bank Accounts" onPress={() => navigation.navigate("LinkedBanks")} colors={colors} />
+          <MenuRow label="Notification Preferences" onPress={() => navigation.navigate("Notifications")} colors={colors} />
+          <MenuRow label="Help & Support" onPress={() => navigation.navigate("Help")} colors={colors} last />
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Legal</Text>
         <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-          <MenuRow label="Privacy Policy" colors={colors} />
-          <MenuRow label="Terms of Service" colors={colors} last />
+          <MenuRow label="Privacy Policy" onPress={() => navigation.navigate("PrivacyPolicy", { type: "privacy" })} colors={colors} />
+          <MenuRow label="Terms of Service" onPress={() => navigation.navigate("TermsOfService", { type: "terms" })} colors={colors} last />
         </View>
 
         <TouchableOpacity style={[styles.deleteButton, { borderColor: colors.error }]} onPress={handleDeleteAccount}>

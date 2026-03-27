@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Linking } from "react-native";
 import Button from "../../components/Button";
 import { api } from "../../api";
-import { colors } from "../../utils/colors";
+import { useTheme } from "../../utils/theme";
 
 export default function KycScreen({ navigation }: any) {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -14,15 +15,22 @@ export default function KycScreen({ navigation }: any) {
     try {
       const { data } = await api.post("/kyc/session");
       const sessionUrl = data.data.session_url;
-      // In production: open Veriff SDK with sessionUrl
-      // For now, navigate to status screen
-      navigation.navigate("KycStatus");
+
+      if (sessionUrl) {
+        // Open Veriff verification in browser
+        // Veriff handles document scanning + face recognition
+        await Linking.openURL(sessionUrl);
+        // After user completes, navigate to status screen
+        navigation.navigate("KycStatus");
+      } else {
+        setError("Could not start verification. Try again.");
+      }
     } catch (err: any) {
       if (err.response?.status === 400) {
-        setError("You're already verified!");
+        // Already verified
         navigation.navigate("Main");
       } else {
-        setError("Failed to start verification. Try again.");
+        setError(err.response?.data?.error ?? "Failed to start verification. Try again.");
       }
     } finally {
       setLoading(false);
@@ -30,52 +38,53 @@ export default function KycScreen({ navigation }: any) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.progress}>
-        <View style={styles.progressDot} />
-        <View style={styles.progressDot} />
-        <View style={[styles.progressDot, styles.progressActive]} />
-        <View style={styles.progressDot} />
-      </View>
-
-      <View style={styles.iconCircle}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
+      <View style={[styles.iconCircle, { backgroundColor: colors.accentLight }]}>
         <Text style={styles.icon}>🪪</Text>
       </View>
 
-      <Text style={styles.title}>Verify your identity</Text>
-      <Text style={styles.subtitle}>
-        We need to verify your identity before you can send money. This takes about 2 minutes.
+      <Text style={[styles.title, { color: colors.text }]}>Verify your identity</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        To send money, we need to verify your identity. This takes about 2 minutes.
       </Text>
 
-      <View style={styles.docTypes}>
-        {["Passport", "Driver's License", "National ID"].map((doc) => (
-          <View key={doc} style={styles.docRow}>
-            <Text style={styles.checkmark}>✓</Text>
-            <Text style={styles.docText}>{doc}</Text>
-          </View>
-        ))}
+      <View style={styles.steps}>
+        <StepItem icon="📄" text="Scan your ID (passport, driver's license, or national ID)" colors={colors} />
+        <StepItem icon="🤳" text="Take a selfie for facial recognition" colors={colors} />
+        <StepItem icon="✅" text="Get verified instantly" colors={colors} />
       </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
+
+      <View style={{ flex: 1 }} />
 
       <Button title="Start Verification" onPress={handleStartKyc} loading={loading} />
-      <Button title="Skip for now" onPress={() => navigation.navigate("Main")} variant="outline" style={{ marginTop: 12 }} />
+      <Button title="Skip for now" onPress={() => navigation.goBack()} variant="outline" style={{ marginTop: 12 }} />
     </View>
   );
 }
 
+function StepItem({ icon, text, colors }: { icon: string; text: string; colors: any }) {
+  return (
+    <View style={stepStyles.row}>
+      <Text style={stepStyles.icon}>{icon}</Text>
+      <Text style={[stepStyles.text, { color: colors.text }]}>{text}</Text>
+    </View>
+  );
+}
+
+const stepStyles = StyleSheet.create({
+  row: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+  icon: { fontSize: 24 },
+  text: { fontSize: 15, flex: 1, lineHeight: 22 },
+});
+
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: colors.bgPrimary, justifyContent: "center" },
-  progress: { flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: 32 },
-  progressDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.cardBorder },
-  progressActive: { backgroundColor: colors.accent, width: 24 },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.accentLight, justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 24 },
+  container: { flex: 1, padding: 24, justifyContent: "center" },
+  iconCircle: { width: 80, height: 80, borderRadius: 40, justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 24 },
   icon: { fontSize: 36 },
-  title: { fontSize: 24, fontWeight: "700", color: colors.textPrimary, textAlign: "center", marginBottom: 8 },
-  subtitle: { fontSize: 16, color: colors.textSecondary, textAlign: "center", marginBottom: 32, lineHeight: 24 },
-  docTypes: { gap: 12, marginBottom: 32 },
-  docRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16 },
-  checkmark: { color: colors.success, fontSize: 16, fontWeight: "700" },
-  docText: { fontSize: 16, color: colors.textPrimary },
-  error: { color: colors.error, fontSize: 14, textAlign: "center", marginBottom: 16 },
+  title: { fontSize: 24, fontWeight: "700", textAlign: "center", marginBottom: 8 },
+  subtitle: { fontSize: 16, textAlign: "center", marginBottom: 32, lineHeight: 24 },
+  steps: { gap: 4, marginBottom: 32 },
+  error: { fontSize: 14, textAlign: "center", marginBottom: 16 },
 });

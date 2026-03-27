@@ -54,6 +54,14 @@ export const env = {
   // Referral
   REFERRAL_REWARD_CENTS: parseInt(process.env.REFERRAL_REWARD_CENTS ?? "500", 10), // $5.00
 
+  // Plaid
+  PLAID_CLIENT_ID: process.env.PLAID_CLIENT_ID ?? "",
+  PLAID_SECRET: process.env.PLAID_SECRET ?? "",
+  PLAID_ENV: process.env.PLAID_ENV ?? "sandbox",
+
+  // Stripe publishable key (for mobile)
+  STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
+
   // App
-  APP_URL: process.env.APP_URL ?? "https://payvio.com",
+  APP_URL: process.env.APP_URL ?? "https://payvioapp.com",
 } as const;
