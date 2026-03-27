@@ -10,6 +10,7 @@ export class UserService {
       const referralCode = this.generateReferralCode();
       user = await prisma.user.create({
         data: {
+          email: `${phone}@phone.payvio.local`,
           phone,
           countryCode,
           referralCode,

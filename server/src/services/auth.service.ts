@@ -47,7 +47,7 @@ export class AuthService {
 
     const newTokens = this.tokenService.generateTokenPair(
       stored.user.id,
-      stored.user.phone
+      stored.user.email ?? stored.user.phone ?? ""
     );
 
     await prisma.refreshToken.create({
