@@ -31,6 +31,7 @@ RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy Prisma generated client + schema
 COPY --from=builder /app/src/generated/ ./src/generated/
+COPY --from=builder /app/src/generated/ ./dist/generated/
 COPY --from=builder /app/prisma/ ./prisma/
 COPY --from=builder /app/prisma.config.ts ./
 
