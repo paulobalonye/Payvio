@@ -15,20 +15,24 @@ export default function KycQueuePage() {
     try {
       const { data } = await api.get("/kyc/queue");
       setQueue(data.data ?? []);
-    } catch {}
+    } catch (err) { console.error(err); }
   };
 
   const handleApprove = async (id: string) => {
-    await api.post(`/kyc/${id}/approve`);
-    fetchQueue();
+    try {
+      await api.post(`/kyc/${id}/approve`);
+      fetchQueue();
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleReject = async () => {
     if (!selectedId) return;
-    await api.post(`/kyc/${selectedId}/reject`, { reason_code: rejectReason });
-    setShowReject(false);
-    setSelectedId(null);
-    fetchQueue();
+    try {
+      await api.post(`/kyc/${selectedId}/reject`, { reason_code: rejectReason });
+      setShowReject(false);
+      setSelectedId(null);
+      fetchQueue();
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const getSlaColor = (hours: number) => hours > 20 ? "bg-red-100 text-red-700" : hours > 12 ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700";

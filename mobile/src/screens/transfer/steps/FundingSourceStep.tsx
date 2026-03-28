@@ -7,8 +7,7 @@ import { walletApi } from "../../../api";
 import { formatCurrency } from "../../../utils/format";
 import { useTheme } from "../../../utils/theme";
 import Button from "../../../components/Button";
-
-const STRIPE_PK = "pk_test_51T1GESJ6Hy0kXTetc16ca2PvuIRVHHy69dlA9UQN5ky9Op8lKO43Y0KrhmP7YXFDviUIq7fqwM1lqTPpf5H9l14M008YB9GE0I";
+import { config } from "../../../config/env";
 
 type FundingSource = { readonly type: string; readonly label: string };
 
@@ -204,7 +203,7 @@ function FundingSourceContent({ amount, onSelect, onBack }: Props) {
 
 export default function FundingSourceStep(props: Props) {
   return (
-    <StripeProvider publishableKey={STRIPE_PK}>
+    <StripeProvider publishableKey={config.STRIPE_PUBLISHABLE_KEY}>
       <FundingSourceContent {...props} />
     </StripeProvider>
   );

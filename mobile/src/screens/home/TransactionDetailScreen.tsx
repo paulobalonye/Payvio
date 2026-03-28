@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Share } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Share, Linking } from "react-native";
 import StatusBadge from "../../components/StatusBadge";
 import { formatCurrency, formatDate } from "../../utils/format";
 import { colors } from "../../utils/colors";
@@ -43,7 +43,7 @@ export default function TransactionDetailScreen({ route, navigation }: any) {
           <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
             <Text style={styles.actionText}>Share Receipt</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity style={styles.actionBtn} onPress={() => Linking.openURL("mailto:support@payvio.com")}>
             <Text style={styles.actionText}>Need Help?</Text>
           </TouchableOpacity>
         </View>

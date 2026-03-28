@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate";
 import { WalletController } from "../controllers/wallet.controller";
+import {
+  initiateFundingSchema,
+  creditAfterPaymentSchema,
+  verifyBankSchema,
+} from "../validators/wallet.validator";
 
 const walletRouter = Router();
 const controller = new WalletController();
@@ -10,16 +16,16 @@ walletRouter.get("/", authenticate, controller.getWallet);
 walletRouter.get("/all", authenticate, controller.getAllWallets);
 
 // Funding
-walletRouter.post("/fund", authenticate, controller.initiateFunding);
+walletRouter.post("/fund", authenticate, validate(initiateFundingSchema), controller.initiateFunding);
 
 // Credit wallet after successful Stripe payment (called by mobile app)
-walletRouter.post("/credit-after-payment", authenticate, controller.creditAfterPayment);
+walletRouter.post("/credit-after-payment", authenticate, validate(creditAfterPaymentSchema), controller.creditAfterPayment);
 
 // Stripe webhook (public — validated by signature)
 walletRouter.post("/webhooks/stripe", controller.handleStripeWebhook);
 
 // Bank verification (Flutterwave)
-walletRouter.post("/banks/verify", authenticate, controller.verifyBankAccount);
+walletRouter.post("/banks/verify", authenticate, validate(verifyBankSchema), controller.verifyBankAccount);
 walletRouter.get("/banks/:country", authenticate, controller.getBankList);
 
 export { walletRouter };

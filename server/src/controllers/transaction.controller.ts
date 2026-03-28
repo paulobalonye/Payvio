@@ -2,6 +2,8 @@ import type { Request, Response, NextFunction } from "express";
 import { TransactionService } from "../services/transaction.service";
 import { ReceiptService } from "../services/receipt.service";
 import { NotificationService } from "../services/notification.service";
+import { prisma } from "../config/database";
+import { AppError } from "../middleware/error-handler";
 import type { ApiResponse, Transaction } from "../types";
 
 const transactionService = new TransactionService();
@@ -27,16 +29,35 @@ export class TransactionController {
 
   async getReceipt(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = req.user!.sub;
+      const transferId = req.params.id as string;
+
+      const transfer = await prisma.transfer.findFirst({
+        where: { id: transferId, userId },
+        include: {
+          user: { select: { firstName: true, lastName: true } },
+          recipient: { select: { firstName: true, lastName: true } },
+        },
+      });
+
+      if (!transfer) {
+        throw new AppError(404, "Transfer not found");
+      }
+
+      const senderName = [transfer.user.firstName, transfer.user.lastName].filter(Boolean).join(" ") || "Unknown";
+      const recipientName = [transfer.recipient.firstName, transfer.recipient.lastName].filter(Boolean).join(" ") || "Unknown";
+      const fmt = (cents: number, currency: string) => `${currency === "USD" ? "$" : ""}${(cents / 100).toFixed(2)}${currency !== "USD" ? ` ${currency}` : ""}`;
+
       const html = receiptService.generateHtml({
-        transferId: req.params.id as string,
-        senderName: "User",
-        recipientName: "Recipient",
-        sendAmount: "$0.00",
-        receiveAmount: "0.00",
-        fxRate: "N/A",
-        fee: "$0.00",
-        status: "N/A",
-        date: new Date().toISOString(),
+        transferId: transfer.id,
+        senderName,
+        recipientName,
+        sendAmount: fmt(transfer.sendAmount, transfer.sendCurrency),
+        receiveAmount: fmt(transfer.receiveAmount, transfer.receiveCurrency),
+        fxRate: `1 ${transfer.sendCurrency} = ${transfer.fxRate.toFixed(4)} ${transfer.receiveCurrency}`,
+        fee: fmt(transfer.fee, transfer.sendCurrency),
+        status: transfer.status,
+        date: transfer.createdAt.toISOString(),
       });
 
       res.setHeader("Content-Type", "text/html");

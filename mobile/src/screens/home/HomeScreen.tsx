@@ -36,7 +36,7 @@ export default function HomeScreen({ navigation }: any) {
       ]);
       setBalance(walletRes.data.data.balance);
       setTransactions(txRes.data.data ?? []);
-    } catch {}
+    } catch { /* wallet fetch is non-blocking */ }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);

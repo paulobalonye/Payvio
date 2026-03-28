@@ -120,7 +120,20 @@ export class WalletController {
 
   async handleStripeWebhook(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const parsed = stripeService.parseWebhookEvent(req.body);
+      const signature = req.headers["stripe-signature"] as string;
+      if (!signature || !env.STRIPE_WEBHOOK_SECRET) {
+        res.status(400).json({ success: false, error: "Missing signature" });
+        return;
+      }
+
+      const rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+      const verified = stripeService.verifyWebhookSignature(rawBody, signature, env.STRIPE_WEBHOOK_SECRET);
+      if (!verified) {
+        res.status(400).json({ success: false, error: "Invalid signature" });
+        return;
+      }
+
+      const parsed = stripeService.parseWebhookEvent(typeof req.body === "string" ? JSON.parse(req.body) : req.body);
 
       if (parsed) {
         await walletService.creditWallet(parsed.userId, {

@@ -16,7 +16,7 @@ export default function SupportPage() {
     try {
       const { data } = await api.get(`/lookup?q=${encodeURIComponent(query)}`);
       setResults(data.data);
-    } catch {}
+    } catch (err) { console.error(err); }
   };
 
   const handleSendNotif = async () => {

@@ -93,9 +93,34 @@ export class StripeService {
   verifyWebhookSignature(
     payload: string,
     signature: string,
-    _secret: string
+    secret: string
   ): boolean {
-    // In production: Stripe.webhooks.constructEvent(payload, signature, secret)
-    return !!payload && !!signature;
+    if (!payload || !signature || !secret) return false;
+
+    const crypto = require("crypto");
+    const elements = signature.split(",");
+    const timestampPart = elements.find((e: string) => e.startsWith("t="));
+    const sigPart = elements.find((e: string) => e.startsWith("v1="));
+
+    if (!timestampPart || !sigPart) return false;
+
+    const timestamp = timestampPart.slice(2);
+    const expectedSig = sigPart.slice(3);
+
+    const signedPayload = `${timestamp}.${payload}`;
+    const computedSig = crypto
+      .createHmac("sha256", secret)
+      .update(signedPayload)
+      .digest("hex");
+
+    // Timing-safe comparison
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(computedSig, "hex"),
+        Buffer.from(expectedSig, "hex")
+      );
+    } catch {
+      return false;
+    }
   }
 }

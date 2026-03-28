@@ -42,7 +42,7 @@ export default function DashboardPage() {
       setOverview(ov.data.data);
       setCorridors(cor.data.data ?? []);
       setVolumeData(vol.data.data ?? []);
-    } catch {}
+    } catch (err) { console.error(err); }
   }, [dateRange]);
 
   useEffect(() => { fetchData(); }, [fetchData]);

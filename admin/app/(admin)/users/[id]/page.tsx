@@ -17,7 +17,7 @@ export default function UserDetailPage() {
     try {
       const { data: res } = await api.get(`/users/${id}`);
       setData(res.data);
-    } catch {}
+    } catch (err) { console.error(err); }
   };
 
   const handleAddNote = async () => {

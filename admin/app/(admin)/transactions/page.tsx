@@ -27,7 +27,7 @@ export default function TransactionsPage() {
         results = results.filter((t: any) => t.id.toLowerCase().includes(q) || t.userId.toLowerCase().includes(q));
       }
       setTransfers(results);
-    } catch {} finally { setLoading(false); }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   const fetchAmlFlags = async () => {
@@ -35,7 +35,7 @@ export default function TransactionsPage() {
     try {
       const { data } = await api.get("/aml/flags");
       setAmlFlags(data.data ?? []);
-    } catch {} finally { setLoading(false); }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   const handleRefund = async (id: string) => {
@@ -139,7 +139,7 @@ export default function TransactionsPage() {
                   <td className="px-4 py-3 font-medium">{fmt(f.sendAmount)}</td>
                   <td className="px-4 py-3">{f.sendCurrency}→{f.receiveCurrency}</td>
                   <td className="px-4 py-3 text-xs">{f.rule_triggered}</td>
-                  <td className="px-4 py-3">{f.risk_score}h</td>
+                  <td className="px-4 py-3">{f.hours_in_queue != null ? `${f.hours_in_queue}h` : Math.max(1, Math.round((Date.now() - new Date(f.created_at ?? f.createdAt).getTime()) / 3600000)) + "h"}</td>
                   <td className="px-4 py-3 flex gap-2">
                     <button onClick={() => handleAmlAction(f.id, "release")} className="px-2 py-1 bg-emerald-600 text-white rounded text-xs">Release</button>
                     <button onClick={() => handleAmlAction(f.id, "block")} className="px-2 py-1 bg-red-600 text-white rounded text-xs">Block</button>

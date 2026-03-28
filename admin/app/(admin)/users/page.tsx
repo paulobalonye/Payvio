@@ -23,7 +23,7 @@ export default function UsersPage() {
       if (filter !== "all") params.set("status", filter);
       const { data } = await api.get(`/users?${params}`);
       setUsers(data.data ?? []);
-    } catch {} finally { setLoading(false); }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   let debounceTimer: any;

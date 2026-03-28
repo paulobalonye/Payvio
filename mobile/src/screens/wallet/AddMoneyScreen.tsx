@@ -4,8 +4,7 @@ import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import Button from "../../components/Button";
 import { walletApi } from "../../api";
 import { useTheme } from "../../utils/theme";
-
-const STRIPE_PUBLISHABLE_KEY = "pk_test_51T1GESJ6Hy0kXTetc16ca2PvuIRVHHy69dlA9UQN5ky9Op8lKO43Y0KrhmP7YXFDviUIq7fqwM1lqTPpf5H9l14M008YB9GE0I";
+import { config } from "../../config/env";
 
 const PRESETS = [5000, 10000, 25000, 50000];
 
@@ -124,7 +123,7 @@ function AddMoneyContent({ navigation }: any) {
 
 export default function AddMoneyScreen({ navigation }: any) {
   return (
-    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+    <StripeProvider publishableKey={config.STRIPE_PUBLISHABLE_KEY}>
       <AddMoneyContent navigation={navigation} />
     </StripeProvider>
   );

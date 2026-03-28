@@ -1,3 +1,4 @@
+// TODO: Wire to /settings/notifications API when backend endpoint is ready
 import { useState } from "react";
 import { View, Text, Switch, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
 import { useTheme } from "../../utils/theme";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Alert } from "react-native";
 import Button from "../../components/Button";
 import { useTheme } from "../../utils/theme";
 
@@ -28,7 +28,7 @@ export default function LinkedBanksScreen({ navigation }: any) {
 
         <Button title="Link Bank Account" onPress={() => {
           // Plaid Link will be integrated here
-          alert("Plaid integration coming soon. Use card funding for now.");
+          Alert.alert("Coming Soon", "Bank account linking via Plaid will be available in a future update.");
         }} />
 
         <Text style={[styles.note, { color: colors.textMuted }]}>

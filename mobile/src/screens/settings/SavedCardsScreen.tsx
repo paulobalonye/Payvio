@@ -6,8 +6,7 @@ import * as SecureStore from "expo-secure-store";
 import Button from "../../components/Button";
 import { useTheme } from "../../utils/theme";
 import { useFocusEffect } from "@react-navigation/native";
-
-const STRIPE_PK = "pk_test_51T1GESJ6Hy0kXTetc16ca2PvuIRVHHy69dlA9UQN5ky9Op8lKO43Y0KrhmP7YXFDviUIq7fqwM1lqTPpf5H9l14M008YB9GE0I";
+import { config } from "../../config/env";
 
 type SavedCard = {
   id: string;
@@ -186,7 +185,7 @@ function SavedCardsContent({ navigation }: any) {
 
 export default function SavedCardsScreen({ navigation }: any) {
   return (
-    <StripeProvider publishableKey={STRIPE_PK}>
+    <StripeProvider publishableKey={config.STRIPE_PUBLISHABLE_KEY}>
       <SavedCardsContent navigation={navigation} />
     </StripeProvider>
   );

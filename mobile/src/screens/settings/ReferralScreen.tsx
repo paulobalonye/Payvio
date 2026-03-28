@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Share } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Share, Alert } from "react-native";
 import { api } from "../../api";
 import { formatCurrency } from "../../utils/format";
 import { colors } from "../../utils/colors";
@@ -16,7 +16,7 @@ export default function ReferralScreen({ navigation }: any) {
       const { data } = await api.get("/referrals");
       setStats(data.data);
     } catch {
-      // silently fail
+      Alert.alert("Error", "Could not load referral data.");
     }
   };
 

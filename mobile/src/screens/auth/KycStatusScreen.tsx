@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Linking } from "react-native";
 import Button from "../../components/Button";
 import { api } from "../../api";
 import { colors } from "../../utils/colors";
@@ -51,7 +51,7 @@ export default function KycStatusScreen({ navigation }: any) {
         <Text style={styles.title}>Verification unsuccessful</Text>
         <Text style={styles.subtitle}>We couldn't verify your identity. Please try again with a clearer photo of your ID.</Text>
         <Button title="Try Again" onPress={() => navigation.goBack()} />
-        <Button title="Contact Support" onPress={() => {}} variant="outline" style={{ marginTop: 12 }} />
+        <Button title="Contact Support" onPress={() => Linking.openURL("mailto:support@payvio.com")} variant="outline" style={{ marginTop: 12 }} />
       </View>
     );
   }

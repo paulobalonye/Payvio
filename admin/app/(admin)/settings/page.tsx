@@ -27,45 +27,57 @@ export default function SettingsPage() {
   }, []);
 
   const handleCreateAdmin = async () => {
-    await api.post("/system/admins", newAdmin);
-    setShowCreate(false);
-    setNewAdmin({ email: "", password: "", role: "SUPPORT" });
-    const { data } = await api.get("/system/admins");
-    setAdmins(data.data ?? []);
+    try {
+      await api.post("/system/admins", newAdmin);
+      setShowCreate(false);
+      setNewAdmin({ email: "", password: "", role: "SUPPORT" });
+      const { data } = await api.get("/system/admins");
+      setAdmins(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleToggleFlag = async (key: string, enabled: boolean) => {
-    await api.patch(`/system/feature-flags/${key}`, { enabled: !enabled });
-    const { data } = await api.get("/system/feature-flags");
-    setFlags(data.data ?? []);
+    try {
+      await api.patch(`/system/feature-flags/${key}`, { enabled: !enabled });
+      const { data } = await api.get("/system/feature-flags");
+      setFlags(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleDeactivate = async (id: string) => {
     if (!confirm("Deactivate this admin?")) return;
-    await api.patch(`/system/admins/${id}/deactivate`);
-    const { data } = await api.get("/system/admins");
-    setAdmins(data.data ?? []);
+    try {
+      await api.patch(`/system/admins/${id}/deactivate`);
+      const { data } = await api.get("/system/admins");
+      setAdmins(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleChangeRole = async (id: string) => {
-    await api.patch(`/system/admins/${id}/role`, { role: newRole });
-    setEditingRole(null);
-    const { data } = await api.get("/system/admins");
-    setAdmins(data.data ?? []);
+    try {
+      await api.patch(`/system/admins/${id}/role`, { role: newRole });
+      setEditingRole(null);
+      const { data } = await api.get("/system/admins");
+      setAdmins(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleUpdateLimit = async (key: string, value: string) => {
-    await api.patch(`/system/limits/${key}`, { value: parseInt(value) });
-    const { data } = await api.get("/system/limits");
-    setLimits(data.data ?? []);
+    try {
+      await api.patch(`/system/limits/${key}`, { value: parseInt(value) });
+      const { data } = await api.get("/system/limits");
+      setLimits(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const handleAddLimit = async () => {
     if (!newLimitKey || !newLimitValue) return;
-    await api.patch(`/system/limits/${newLimitKey}`, { value: parseInt(newLimitValue) });
-    setNewLimitKey(""); setNewLimitValue("");
-    const { data } = await api.get("/system/limits");
-    setLimits(data.data ?? []);
+    try {
+      await api.patch(`/system/limits/${newLimitKey}`, { value: parseInt(newLimitValue) });
+      setNewLimitKey(""); setNewLimitValue("");
+      const { data } = await api.get("/system/limits");
+      setLimits(data.data ?? []);
+    } catch (err) { console.error(err); alert("Action failed. Please try again."); }
   };
 
   const filterAuditLog = async () => {

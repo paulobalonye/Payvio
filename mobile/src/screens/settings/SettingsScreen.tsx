@@ -11,7 +11,7 @@ export default function SettingsScreen({ navigation }: any) {
   useEffect(() => { fetchProfile(); }, []);
 
   const fetchProfile = async () => {
-    try { const { data } = await api.get("/settings"); setUser(data.data); } catch {}
+    try { const { data } = await api.get("/settings"); setUser(data.data); } catch { Alert.alert("Error", "Something went wrong. Please try again."); }
   };
 
   const handleDeleteAccount = () => {

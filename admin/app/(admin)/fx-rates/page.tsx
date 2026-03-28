@@ -15,25 +15,31 @@ export default function FxRatesPage() {
   useEffect(() => { fetchConfigs(); }, []);
 
   const fetchConfigs = async () => {
-    try { const { data } = await api.get("/fx/rates"); setConfigs(data.data ?? []); } catch {}
+    try { const { data } = await api.get("/fx/rates"); setConfigs(data.data ?? []); } catch (err) { console.error(err); }
   };
 
   const handleSave = async (corridor: string) => {
-    await api.patch(`/fx/rates/${corridor}`, { spread: parseFloat(spread), flat_fee: parseInt(flatFee) });
-    setEditing(null);
-    fetchConfigs();
+    try {
+      await api.patch(`/fx/rates/${corridor}`, { spread: parseFloat(spread), flat_fee: parseInt(flatFee) });
+      setEditing(null);
+      fetchConfigs();
+    } catch (err) { console.error(err); alert("Failed to update. Please try again."); }
   };
 
   const handleSetOverride = async (corridor: string) => {
-    await api.post(`/fx/rates/${corridor}/override`, { rate: parseFloat(overrideRate), expiry: overrideExpiry });
-    setShowOverride(null);
-    setOverrideRate(""); setOverrideExpiry("");
-    fetchConfigs();
+    try {
+      await api.post(`/fx/rates/${corridor}/override`, { rate: parseFloat(overrideRate), expiry: overrideExpiry });
+      setShowOverride(null);
+      setOverrideRate(""); setOverrideExpiry("");
+      fetchConfigs();
+    } catch (err) { console.error(err); alert("Failed to update. Please try again."); }
   };
 
   const handleRemoveOverride = async (corridor: string) => {
-    await api.delete(`/fx/rates/${corridor}/override`);
-    fetchConfigs();
+    try {
+      await api.delete(`/fx/rates/${corridor}/override`);
+      fetchConfigs();
+    } catch (err) { console.error(err); alert("Failed to update. Please try again."); }
   };
 
   return (
