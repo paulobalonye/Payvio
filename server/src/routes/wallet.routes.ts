@@ -24,8 +24,14 @@ walletRouter.post("/credit-after-payment", authenticate, validate(creditAfterPay
 // Stripe webhook (public — validated by signature)
 walletRouter.post("/webhooks/stripe", controller.handleStripeWebhook);
 
-// Bank verification (Flutterwave)
+// Bank verification (Flutterwave for NG, YellowCard for others)
 walletRouter.post("/banks/verify", authenticate, validate(verifyBankSchema), controller.verifyBankAccount);
 walletRouter.get("/banks/:country", authenticate, controller.getBankList);
+
+// Mobile money verification (YellowCard)
+walletRouter.post("/momo/verify", authenticate, controller.verifyMomoAccount);
+
+// YellowCard channels per country
+walletRouter.get("/channels/:country", authenticate, controller.getChannels);
 
 export { walletRouter };

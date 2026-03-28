@@ -13,7 +13,7 @@ const METHODS: { key: PayoutMethod; icon: string; label: string }[] = [
   { key: "cash_pickup", icon: "💵", label: "Cash Pickup" },
 ];
 
-const PROVIDERS = [
+const FALLBACK_PROVIDERS = [
   { id: "mpesa", name: "M-Pesa", icon: "🟢" },
   { id: "mtn", name: "MTN MoMo", icon: "🟡" },
   { id: "airtel", name: "Airtel Money", icon: "🔵" },
@@ -37,31 +37,76 @@ export default function AddRecipientStep({ country, onSaved, onBack }: Props) {
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileProvider, setMobileProvider] = useState("mpesa");
   const [banks, setBanks] = useState<any[]>([]);
+  const [momoProviders, setMomoProviders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [verifiedMomoName, setVerifiedMomoName] = useState("");
   const [savedRecipient, setSavedRecipient] = useState<any>(null);
 
+  const isNG = country.code === "NG";
+
+  // Fetch bank list (Flutterwave for NG, YellowCard networks for others)
   useEffect(() => {
-    if (method === "bank_transfer" && country.code === "NG") {
+    if (method === "bank_transfer") {
       walletApi.getBankList(country.code).then(r => setBanks(r.data.data ?? [])).catch(() => {});
     }
   }, [method, country.code]);
 
-  // Auto-verify bank account when account number is 10 digits (Nigeria)
+  // Fetch mobile money providers from YellowCard networks for non-NG
   useEffect(() => {
-    if (method === "bank_transfer" && accountNumber.length === 10 && bankName && country.code === "NG") {
-      verifyAccount();
+    if (method === "mobile_money" && !isNG) {
+      walletApi.getBankList(country.code).then(r => {
+        const networks = r.data.data ?? [];
+        // Filter for mobile money type networks
+        const momo = networks.filter((n: any) => n.type === "momo" || n.type === "mobile_money");
+        setMomoProviders(momo.length > 0 ? momo : networks);
+      }).catch(() => {});
+    }
+  }, [method, country.code, isNG]);
+
+  // Auto-verify bank account when account number reaches expected length
+  useEffect(() => {
+    if (method === "bank_transfer" && bankName) {
+      if (isNG && accountNumber.length === 10) {
+        verifyAccount();
+      } else if (!isNG && accountNumber.length >= 5) {
+        verifyAccount();
+      }
     }
   }, [accountNumber, bankName]);
 
   const verifyAccount = async () => {
     setVerifying(true);
     try {
-      const bankCode = banks.find(b => b.name === bankName)?.code ?? "044";
-      const { data } = await walletApi.verifyBankAccount(accountNumber, bankCode, country.code);
-      setVerifiedName(data.data.account_name);
+      const selectedBank = banks.find(b => b.name === bankName);
+      if (isNG) {
+        const bankCode = selectedBank?.code ?? "044";
+        const { data } = await walletApi.verifyBankAccount(accountNumber, bankCode, country.code);
+        setVerifiedName(data.data.account_name);
+      } else {
+        const networkId = selectedBank?.network_id ?? selectedBank?.id;
+        if (!networkId) { setVerifiedName(""); return; }
+        const { data } = await walletApi.verifyBankAccount(accountNumber, "", country.code, networkId);
+        setVerifiedName(data.data.account_name);
+      }
     } catch {
       setVerifiedName("");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const verifyMomo = async () => {
+    if (!mobileNumber || !mobileProvider) return;
+    setVerifying(true);
+    try {
+      const provider = momoProviders.find(p => p.id === mobileProvider || p.name === mobileProvider);
+      const networkId = provider?.network_id ?? provider?.id;
+      if (!networkId) { setVerifiedMomoName(""); setVerifying(false); return; }
+      const { data } = await walletApi.verifyMomoAccount(mobileNumber, networkId);
+      setVerifiedMomoName(data.data.account_name);
+    } catch {
+      setVerifiedMomoName("");
     } finally {
       setVerifying(false);
     }
@@ -148,8 +193,9 @@ export default function AddRecipientStep({ country, onSaved, onBack }: Props) {
             )}
             {method === "mobile_money" && (
               <>
-                <ConfirmRow label="Provider" value={PROVIDERS.find(p => p.id === mobileProvider)?.name ?? mobileProvider} colors={colors} />
+                <ConfirmRow label="Provider" value={[...momoProviders, ...FALLBACK_PROVIDERS].find(p => (p.id ?? p.key) === mobileProvider)?.name ?? mobileProvider} colors={colors} />
                 <ConfirmRow label="Mobile number" value={mobileNumber} colors={colors} />
+                {verifiedMomoName && <ConfirmRow label="Account name" value={verifiedMomoName} colors={colors} highlight />}
               </>
             )}
             <ConfirmRow label="Currency" value={`${country.currency}`} colors={colors} last />
@@ -238,22 +284,39 @@ export default function AddRecipientStep({ country, onSaved, onBack }: Props) {
           <>
             <Text style={[styles.sectionLabel, { color: colors.textMuted, marginTop: 8 }]}>MOBILE MONEY PROVIDER</Text>
             <View style={styles.providerChips}>
-              {PROVIDERS.map(p => (
-                <TouchableOpacity
-                  key={p.id}
-                  style={[styles.providerChip, { borderColor: mobileProvider === p.id ? colors.accent : colors.cardBorder, backgroundColor: mobileProvider === p.id ? (isDark ? "#312e81" : "#eef2ff") : colors.card }]}
-                  onPress={() => setMobileProvider(p.id)}
-                >
-                  <Text>{p.icon}</Text>
-                  <Text style={[styles.providerText, { color: mobileProvider === p.id ? colors.accent : colors.text }]}>{p.name}</Text>
-                </TouchableOpacity>
-              ))}
+              {(momoProviders.length > 0 ? momoProviders : FALLBACK_PROVIDERS).map((p: any) => {
+                const pid = p.id ?? p.key;
+                const pname = p.name;
+                return (
+                  <TouchableOpacity
+                    key={pid}
+                    style={[styles.providerChip, { borderColor: mobileProvider === pid ? colors.accent : colors.cardBorder, backgroundColor: mobileProvider === pid ? (isDark ? "#312e81" : "#eef2ff") : colors.card }]}
+                    onPress={() => setMobileProvider(pid)}
+                  >
+                    <Text>📱</Text>
+                    <Text style={[styles.providerText, { color: mobileProvider === pid ? colors.accent : colors.text }]}>{pname}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             <Text style={[styles.formLabel, { color: colors.textSecondary }]}>Mobile number</Text>
             <TextInput style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.inputBorder, color: colors.text }]}
               value={mobileNumber} onChangeText={setMobileNumber} keyboardType="phone-pad"
               placeholder="+254 7XX XXX XXX" placeholderTextColor={colors.textMuted} />
+
+            {!isNG && mobileNumber.length >= 9 && !verifiedMomoName && !verifying && (
+              <TouchableOpacity onPress={verifyMomo} style={[styles.verifyBtn, { backgroundColor: colors.accent }]}>
+                <Text style={{ color: "#fff", fontWeight: "600", fontSize: 13 }}>Verify number</Text>
+              </TouchableOpacity>
+            )}
+            {verifying && method === "mobile_money" && <ActivityIndicator color={colors.accent} style={{ marginTop: 8 }} />}
+            {verifiedMomoName ? (
+              <View style={[styles.verifiedName, { backgroundColor: colors.successBg }]}>
+                <Text style={[styles.verifiedCheck, { color: colors.success }]}>✓</Text>
+                <Text style={[styles.verifiedText, { color: colors.success }]}>{verifiedMomoName}</Text>
+              </View>
+            ) : null}
           </>
         )}
 
@@ -307,6 +370,7 @@ const styles = StyleSheet.create({
   providerChips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 16 },
   providerChip: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, borderWidth: 1.5 },
   providerText: { fontSize: 13, fontWeight: "600" },
+  verifyBtn: { marginTop: 10, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 10, alignSelf: "flex-start" },
   confirmCard: { borderRadius: 16, padding: 16, borderWidth: 1, marginBottom: 20 },
   avatarLarge: { width: 56, height: 56, borderRadius: 28, justifyContent: "center", alignItems: "center", alignSelf: "center", marginBottom: 12 },
   avatarText: { color: "#fff", fontSize: 20, fontWeight: "700" },

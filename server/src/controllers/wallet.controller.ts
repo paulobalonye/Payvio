@@ -2,12 +2,14 @@ import type { Request, Response, NextFunction } from "express";
 import { WalletService } from "../services/wallet.service";
 import { StripeService } from "../services/stripe.service";
 import { FlutterwaveService } from "../services/flutterwave.service";
+import { YellowCardClient } from "../services/yellowcard.client";
 import { TransactionService } from "../services/transaction.service";
 import { env } from "../config/env";
 import type { ApiResponse, Wallet } from "../types";
 
 const walletService = new WalletService();
 const transactionService = new TransactionService();
+const yellowCardClient = new YellowCardClient();
 
 // Real Stripe client using fetch (no SDK needed)
 const stripeService = new StripeService({
@@ -162,14 +164,55 @@ export class WalletController {
 
   async verifyBankAccount(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { account_number, bank_code, country } = req.body;
-      const result = await flutterwaveService.verifyBankAccount(
-        account_number,
-        bank_code,
-        country ?? "NG"
-      );
+      const { account_number, bank_code, network_id, country } = req.body;
+      const countryCode = (country ?? "NG").toUpperCase();
 
-      res.json({ success: true, data: result });
+      if (countryCode === "NG") {
+        // Nigeria: use Flutterwave
+        const result = await flutterwaveService.verifyBankAccount(
+          account_number,
+          bank_code,
+          countryCode
+        );
+        res.json({ success: true, data: result });
+      } else {
+        // Other countries: use YellowCard
+        if (!network_id) {
+          res.status(400).json({ success: false, error: "network_id is required for non-NG countries" });
+          return;
+        }
+        const result = await yellowCardClient.resolveBank(account_number, network_id);
+        res.json({
+          success: true,
+          data: {
+            account_number: result.accountNumber,
+            account_name: result.accountName,
+            bank_name: result.accountBank,
+          },
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async verifyMomoAccount(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { mobile_number, network_id } = req.body;
+
+      if (!network_id || !mobile_number) {
+        res.status(400).json({ success: false, error: "mobile_number and network_id are required" });
+        return;
+      }
+
+      const result = await yellowCardClient.resolveMomo(mobile_number, network_id);
+      res.json({
+        success: true,
+        data: {
+          account_number: result.accountNumber,
+          account_name: result.accountName,
+        },
+      });
     } catch (err) {
       next(err);
     }
@@ -178,9 +221,34 @@ export class WalletController {
   async getBankList(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const country = (req.params.country as string ?? "NG").toUpperCase();
-      const banks = await flutterwaveService.getBankList(country);
 
-      res.json({ success: true, data: banks });
+      if (country === "NG") {
+        // Nigeria: use Flutterwave
+        const banks = await flutterwaveService.getBankList(country);
+        res.json({ success: true, data: banks });
+      } else {
+        // Other countries: use YellowCard networks
+        const networks = await yellowCardClient.getNetworks(country);
+        const activeNetworks = networks.filter(n => n.status === "active");
+        const data = activeNetworks.map(n => ({
+          id: n.id,
+          code: n.code,
+          name: n.name,
+          type: n.accountNumberType,
+          network_id: n.id,
+        }));
+        res.json({ success: true, data });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getChannels(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const country = (req.params.country as string ?? "NG").toUpperCase();
+      const channels = await yellowCardClient.getChannels(country);
+      res.json({ success: true, data: channels });
     } catch (err) {
       next(err);
     }

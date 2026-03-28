@@ -1,6 +1,22 @@
 import crypto from "crypto";
 import { env } from "../config/env";
 
+export type YellowCardNetwork = {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly country: string;
+  readonly status: string;
+  readonly accountNumberType: string;
+  readonly channelIds: string[];
+};
+
+export type YellowCardAccountDetails = {
+  readonly accountNumber: string;
+  readonly accountName: string;
+  readonly accountBank?: string;
+};
+
 export class YellowCardClient {
   private readonly apiKey = env.YELLOWCARD_API_KEY;
   private readonly secretKey = env.YELLOWCARD_SECRET_KEY;
@@ -76,6 +92,24 @@ export class YellowCardClient {
 
   async getChannels(countryCode: string): Promise<any> {
     return this.get(`/business/channels?countryCode=${countryCode}`);
+  }
+
+  async getNetworks(countryCode: string): Promise<YellowCardNetwork[]> {
+    return this.get<YellowCardNetwork[]>(`/business/networks?country=${countryCode}`);
+  }
+
+  async resolveBank(accountNumber: string, networkId: string): Promise<YellowCardAccountDetails> {
+    return this.post<YellowCardAccountDetails>("/business/details/bank", {
+      accountNumber,
+      networkId,
+    });
+  }
+
+  async resolveMomo(accountNumber: string, networkId: string): Promise<YellowCardAccountDetails> {
+    return this.post<YellowCardAccountDetails>("/business/details/momo", {
+      accountNumber,
+      networkId,
+    });
   }
 
   async submitTransfer(params: {

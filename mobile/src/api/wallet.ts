@@ -10,11 +10,18 @@ export const walletApi = {
   initiateFunding: (amount: number, currency = "USD") =>
     api.post("/wallet/fund", { amount, currency }),
 
-  verifyBankAccount: (accountNumber: string, bankCode: string, country = "NG") =>
+  verifyBankAccount: (accountNumber: string, bankCode: string, country = "NG", networkId?: string) =>
     api.post("/wallet/banks/verify", {
       account_number: accountNumber,
       bank_code: bankCode,
       country,
+      network_id: networkId,
+    }),
+
+  verifyMomoAccount: (mobileNumber: string, networkId: string) =>
+    api.post("/wallet/momo/verify", {
+      mobile_number: mobileNumber,
+      network_id: networkId,
     }),
 
   getBankList: (country = "NG") =>

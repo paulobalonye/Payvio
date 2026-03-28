@@ -27,6 +27,7 @@ export const creditAfterPaymentSchema = z.object({
 
 export const verifyBankSchema = z.object({
   account_number: z.string().min(1, "Account number is required"),
-  bank_code: z.string().min(1, "Bank code is required"),
+  bank_code: z.string().optional(),
+  network_id: z.string().optional(),
   country: z.string().length(2).optional(),
 });

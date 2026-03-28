@@ -29,14 +29,17 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
   useEffect(() => { loadRecipients(); }, []);
 
   useEffect(() => {
-    if (showAdd && country.code === "NG") {
+    if (showAdd) {
       walletApi.getBankList(country.code).then(r => setBanks(r.data.data ?? [])).catch(() => {});
     }
   }, [showAdd]);
 
-  // Auto-verify account when 10 digits entered
+  // Auto-verify account when sufficient digits entered
   useEffect(() => {
-    if (accountNumber.length === 10 && bankCode && country.code === "NG") {
+    const isNG = country.code === "NG";
+    if (isNG && accountNumber.length === 10 && bankCode) {
+      verifyAccount();
+    } else if (!isNG && accountNumber.length >= 5 && bankCode) {
       verifyAccount();
     } else {
       setVerifiedName("");
@@ -54,7 +57,10 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
   const verifyAccount = async () => {
     setVerifying(true);
     try {
-      const { data } = await walletApi.verifyBankAccount(accountNumber, bankCode, country.code);
+      const isNG = country.code === "NG";
+      const selectedBank = banks.find(b => b.code === bankCode || b.name === bankName);
+      const networkId = isNG ? undefined : (selectedBank?.network_id ?? selectedBank?.id);
+      const { data } = await walletApi.verifyBankAccount(accountNumber, bankCode, country.code, networkId);
       setVerifiedName(data.data.account_name);
     } catch {
       setVerifiedName("");
@@ -165,7 +171,7 @@ export default function RecipientStep({ country, onSelect, onBack }: Props) {
                       style={[styles.bankRow, { borderBottomColor: colors.cardBorder }]}
                       onPress={() => {
                         setBankName(item.name);
-                        setBankCode(item.code);
+                        setBankCode(item.code ?? item.network_id ?? item.id);
                         setShowBankPicker(false);
                         setBankSearch("");
                       }}
