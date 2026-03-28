@@ -79,8 +79,7 @@ export default function CtaFooter() {
           {/* Bottom bar */}
           <div className="border-t border-white/10 pt-8 text-center">
             <p className="text-xs text-white/40">
-              {"\u00A9"} 2025 Payvio. All rights reserved. Licensed and regulated by
-              FinCEN and FCA.
+              {"\u00A9"} 2026 Payvio. All rights reserved.
             </p>
           </div>
         </div>

@@ -4,16 +4,23 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 
 const STATUS_FILTERS = ["", "INITIATED", "PROCESSING", "DELIVERED", "FAILED", "REFUNDED"];
+const TX_TYPE_FILTERS = ["", "TRANSFER", "WALLET_CREDIT", "WALLET_DEBIT", "PAYMENT_REQUEST"];
 
 export default function TransactionsPage() {
-  const [tab, setTab] = useState<"transfers" | "aml">("transfers");
+  const [tab, setTab] = useState<"transfers" | "activity" | "aml">("transfers");
   const [transfers, setTransfers] = useState<any[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [amlFlags, setAmlFlags] = useState<any[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
+  const [txTypeFilter, setTxTypeFilter] = useState("");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { tab === "transfers" ? fetchTransfers() : fetchAmlFlags(); }, [statusFilter, tab]);
+  useEffect(() => {
+    if (tab === "transfers") fetchTransfers();
+    else if (tab === "activity") fetchTransactions();
+    else fetchAmlFlags();
+  }, [statusFilter, txTypeFilter, tab]);
 
   const fetchTransfers = async () => {
     setLoading(true);
@@ -27,6 +34,16 @@ export default function TransactionsPage() {
         results = results.filter((t: any) => t.id.toLowerCase().includes(q) || t.userId.toLowerCase().includes(q));
       }
       setTransfers(results);
+    } catch (err) { console.error(err); } finally { setLoading(false); }
+  };
+
+  const fetchTransactions = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (txTypeFilter) params.set("type", txTypeFilter);
+      const { data } = await api.get(`/transactions?${params}`);
+      setTransactions(data.data ?? []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
@@ -68,6 +85,8 @@ export default function TransactionsPage() {
 
   const fmt = (cents: number) => "$" + (cents / 100).toFixed(2);
   const statusColor = (s: string) => s === "DELIVERED" ? "bg-emerald-50 text-emerald-700" : s === "FAILED" ? "bg-red-50 text-red-700" : s === "REFUNDED" ? "bg-purple-50 text-purple-700" : "bg-amber-50 text-amber-700";
+  const txTypeColor = (t: string) => t === "WALLET_CREDIT" ? "bg-emerald-50 text-emerald-700" : t === "WALLET_DEBIT" ? "bg-red-50 text-red-700" : t === "TRANSFER" ? "bg-indigo-50 text-indigo-700" : "bg-slate-50 text-slate-700";
+  const txStatusColor = (s: string) => s === "completed" ? "bg-emerald-50 text-emerald-700" : s === "failed" ? "bg-red-50 text-red-700" : "bg-amber-50 text-amber-700";
   const riskColor = (score: number) => score > 80 ? "bg-red-100 text-red-700" : score > 50 ? "bg-amber-100 text-amber-700" : "bg-yellow-100 text-yellow-700";
 
   return (
@@ -76,6 +95,7 @@ export default function TransactionsPage() {
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Transactions</h1>
         <div className="flex gap-2">
           <button onClick={() => setTab("transfers")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "transfers" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>Transfers</button>
+          <button onClick={() => setTab("activity")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "activity" ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>All Activity</button>
           <button onClick={() => setTab("aml")} className={`px-4 py-2 rounded-lg text-sm font-medium ${tab === "aml" ? "bg-red-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>
             AML Flags {amlFlags.length > 0 && <span className="ml-1 bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs">{amlFlags.length}</span>}
           </button>
@@ -118,7 +138,42 @@ export default function TransactionsPage() {
                     </td>
                   </tr>
                 ))}
-                {transfers.length === 0 && !loading && <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-400">No transfers</td></tr>}
+                {transfers.length === 0 && !loading && <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-400">No transfers yet</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {tab === "activity" && (
+        <>
+          <div className="flex gap-2 mb-6">
+            {TX_TYPE_FILTERS.map(t => (
+              <button key={t} onClick={() => setTxTypeFilter(t)}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition ${txTypeFilter === t ? "bg-indigo-600 text-white" : "bg-white text-slate-600 border border-slate-300 dark:border-slate-600"}`}>
+                {t ? t.replace("_", " ") : "All"}
+              </button>
+            ))}
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead><tr className="text-left text-slate-500 bg-slate-50 dark:bg-slate-900 border-b">
+                <th className="px-4 py-3">ID</th><th className="px-4 py-3">User</th><th className="px-4 py-3">Type</th><th className="px-4 py-3">Amount</th><th className="px-4 py-3">Currency</th><th className="px-4 py-3">Description</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Date</th>
+              </tr></thead>
+              <tbody>
+                {transactions.map((tx: any) => (
+                  <tr key={tx.id} className="border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700">
+                    <td className="px-4 py-3 font-mono text-xs">{tx.id.slice(0,8)}</td>
+                    <td className="px-4 py-3">{tx.user?.email ?? tx.userId?.slice(0,8)}</td>
+                    <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${txTypeColor(tx.type)}`}>{tx.type}</span></td>
+                    <td className="px-4 py-3 font-medium">{fmt(tx.amount)}</td>
+                    <td className="px-4 py-3">{tx.currency}</td>
+                    <td className="px-4 py-3 text-slate-600 dark:text-slate-300 max-w-xs truncate">{tx.description}</td>
+                    <td className="px-4 py-3"><span className={`px-2 py-1 rounded-full text-xs font-medium ${txStatusColor(tx.status)}`}>{tx.status}</span></td>
+                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+                {transactions.length === 0 && !loading && <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-400">No transactions yet</td></tr>}
               </tbody>
             </table>
           </div>

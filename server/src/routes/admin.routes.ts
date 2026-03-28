@@ -92,6 +92,27 @@ adminRouter.post("/kyc/:id/reject", adminAuthenticate, requireRole("SUPER_ADMIN"
   res.json({ success: true });
 }));
 
+// === ALL TRANSACTIONS (admin view) ===
+adminRouter.get("/transactions", adminAuthenticate, wrap(async (req, res) => {
+  const { type, cursor } = req.query as any;
+  const where: any = {};
+  if (type) where.type = type.toUpperCase();
+
+  const { prisma } = await import("../config/database");
+  const transactions = await prisma.transaction.findMany({
+    where,
+    orderBy: { createdAt: "desc" as const },
+    take: 101,
+    include: { user: { select: { firstName: true, lastName: true, email: true } } },
+    ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+  });
+
+  const hasMore = transactions.length > 100;
+  const data = hasMore ? transactions.slice(0, 100) : transactions;
+
+  res.json({ success: true, data, has_more: hasMore });
+}));
+
 // === TRANSFERS (admin view) ===
 adminRouter.get("/transfers", adminAuthenticate, wrap(async (req, res) => {
   const { status, cursor } = req.query as any;

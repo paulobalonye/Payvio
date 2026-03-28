@@ -90,8 +90,7 @@ export class ReceiptService {
 
   <div class="footer">
     <p>Payvio &mdash; Send money home, instantly</p>
-    <p>&copy; 2025 Payvio. All rights reserved.</p>
-    <p>Licensed and regulated by FinCEN and FCA.</p>
+    <p>&copy; 2026 Payvio. All rights reserved.</p>
   </div>
 </body>
 </html>`;

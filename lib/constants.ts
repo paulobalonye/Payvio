@@ -10,7 +10,7 @@ export const HERO = {
   headline: "Send Money Home —\u00A0Instantly",
   subheadline:
     "The fastest way to send money to your loved ones. Low fees, real exchange rates, delivered in minutes.",
-  socialProof: "4.8\u2605 on App Store \u00B7 1M+ transfers \u00B7 Licensed & regulated",
+  socialProof: "",
   floatingCards: [
     "Delivered in 2 min \u2713",
     "Fee: $2.99",
@@ -121,7 +121,7 @@ export const TRUST_BADGES = [
     icon: "ShieldCheck" as const,
     title: "Licensed & Regulated",
     description:
-      "Registered with FinCEN, FCA, and local regulators in every country we operate",
+      "Compliant with industry standards in every country we operate",
   },
   {
     icon: "Lock" as const,

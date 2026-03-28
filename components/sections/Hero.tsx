@@ -94,12 +94,14 @@ export default function Hero() {
             <AppStoreBadges className="justify-center lg:justify-start" />
           </motion.div>
 
-          <motion.p
-            variants={fadeUp}
-            className="text-sm text-[var(--color-text-muted)] mt-6"
-          >
-            {HERO.socialProof}
-          </motion.p>
+          {HERO.socialProof && (
+            <motion.p
+              variants={fadeUp}
+              className="text-sm text-[var(--color-text-muted)] mt-6"
+            >
+              {HERO.socialProof}
+            </motion.p>
+          )}
         </motion.div>
 
         {/* Right: Phone mockup */}

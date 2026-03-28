@@ -88,9 +88,13 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total Users" value={overview?.user_count?.toLocaleString() ?? "—"} />
         <StatCard label="KYC Pending" value={overview?.kyc_pending?.toString() ?? "—"} />
+        <StatCard label="Wallet Funding" value={overview ? fmt(overview.wallet_funding_usd) : "—"} />
+        <StatCard label="Transactions" value={overview?.transaction_count?.toLocaleString() ?? "—"} />
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mb-8">
         <StatCard label="Transfer Volume" value={overview ? fmt(overview.transfer_volume_usd) : "—"} />
         <StatCard label="Transfers" value={overview?.transfer_count?.toLocaleString() ?? "—"} />
         <StatCard label="Success Rate" value={overview ? `${overview.success_rate}%` : "—"} />

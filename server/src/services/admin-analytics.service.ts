@@ -5,9 +5,11 @@ type OverviewResult = {
   readonly kyc_pending: number;
   readonly transfer_volume_usd: number;
   readonly transfer_count: number;
+  readonly transaction_count: number;
   readonly success_rate: number;
   readonly aml_flags: number;
   readonly revenue_usd: number;
+  readonly wallet_funding_usd: number;
 };
 
 type CorridorResult = {
@@ -19,25 +21,31 @@ type CorridorResult = {
 
 export class AdminAnalyticsService {
   async getOverview(): Promise<OverviewResult> {
-    const [userCount, kycPending, transfers] = await Promise.all([
+    const [userCount, kycPending, transfers, transactions] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { kycStatus: "PENDING" } }),
       prisma.transfer.findMany({ select: { sendAmount: true, fee: true, status: true } }),
+      prisma.transaction.findMany({ select: { amount: true, type: true, status: true } }),
     ]);
 
     const totalVolume = transfers.reduce((sum, t) => sum + t.sendAmount, 0);
     const delivered = transfers.filter((t) => t.status === "DELIVERED").length;
     const successRate = transfers.length > 0 ? (delivered / transfers.length) * 100 : 0;
     const revenue = transfers.reduce((sum, t) => sum + t.fee, 0);
+    const walletFunding = transactions
+      .filter((t) => t.type === "WALLET_CREDIT" && t.status === "completed")
+      .reduce((sum, t) => sum + t.amount, 0);
 
     return {
       user_count: userCount,
       kyc_pending: kycPending,
       transfer_volume_usd: totalVolume,
       transfer_count: transfers.length,
+      transaction_count: transactions.length,
       success_rate: Math.round(successRate * 100) / 100,
       aml_flags: 0,
       revenue_usd: revenue,
+      wallet_funding_usd: walletFunding,
     };
   }
 

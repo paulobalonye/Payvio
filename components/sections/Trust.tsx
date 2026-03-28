@@ -14,7 +14,7 @@ export default function Trust() {
       <AnimatedSection className="max-w-7xl mx-auto px-6">
         <SectionHeading
           title="Your money is safe with us"
-          subtitle="Licensed, regulated, and built with security-first engineering"
+          subtitle="Built with security-first engineering"
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
@@ -45,7 +45,7 @@ export default function Trust() {
           variants={itemVariants}
           className="flex flex-wrap items-center justify-center gap-8 md:gap-12 opacity-40"
         >
-          {["FinCEN", "FCA", "PCI DSS", "Visa", "Mastercard"].map((name) => (
+          {["PCI DSS", "Visa", "Mastercard"].map((name) => (
             <div
               key={name}
               className="text-sm font-medium tracking-wider text-[var(--color-text-muted)] uppercase"
