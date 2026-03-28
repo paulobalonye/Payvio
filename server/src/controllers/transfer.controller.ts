@@ -2,16 +2,21 @@ import type { Request, Response, NextFunction } from "express";
 import { FxRateService } from "../services/fx-rate.service";
 import { RecipientService } from "../services/recipient.service";
 import { TransferService } from "../services/transfer.service";
+import { TransactionService } from "../services/transaction.service";
 import { WalletService } from "../services/wallet.service";
+import { YellowCardClient } from "../services/yellowcard.client";
 import type { ApiResponse, FxRate, Recipient, Transfer } from "../types";
 
 const fxRateService = new FxRateService();
 const recipientService = new RecipientService();
 const walletService = new WalletService();
+const transactionService = new TransactionService();
+const yellowCardClient = new YellowCardClient();
 const transferService = new TransferService(
   walletService,
   fxRateService,
-  { submitTransfer: async () => { throw new Error("YellowCard not configured"); } }
+  yellowCardClient,
+  transactionService
 );
 
 export class TransferController {
