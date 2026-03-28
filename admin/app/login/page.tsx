@@ -40,7 +40,10 @@ export default function LoginPage() {
           <p className="text-slate-400 text-sm mt-1">Admin Dashboard</p>
         </div>
 
-        <div className="bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-700">
+        <form
+          className="bg-slate-800 rounded-2xl p-8 shadow-xl border border-slate-700"
+          onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
+        >
           <h2 className="text-xl font-semibold text-white mb-6">
             {step === "credentials" ? "Sign In" : "Enter MFA Code"}
           </h2>
@@ -69,12 +72,12 @@ export default function LoginPage() {
           {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
 
           <button
-            onClick={handleLogin} disabled={loading}
+            type="submit" disabled={loading}
             className="w-full bg-indigo-600 text-white rounded-lg py-3 font-medium hover:bg-indigo-500 disabled:opacity-50 transition"
           >
             {loading ? "..." : step === "credentials" ? "Sign In" : "Verify"}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
